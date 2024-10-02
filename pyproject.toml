@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "platescanner"
+version = "0.1.0"
+description = ""
+authors = [
+    "Maksim Shushkevich <m.e.shushkevich@yandex.com>",
+    "Pavel Lekomtsev <example@of.com>",
+
+]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
