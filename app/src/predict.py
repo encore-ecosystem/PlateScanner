@@ -3,7 +3,7 @@ import os
 from ultralytics import YOLO
 import cv2
 
-VIDEOS_DIR = os.path.join("..","videos")
+VIDEOS_DIR = os.path.join("../..", "videos")
 
 video_path = os.path.join(VIDEOS_DIR, "test.mp4")
 video_path_out = "{}_out.mp4".format(video_path)

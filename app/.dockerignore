@@ -1,5 +1,5 @@
-.idea
-.gitignore
+../.idea
+../.gitignore
 .venv
 Dockerfile
 # Dataset

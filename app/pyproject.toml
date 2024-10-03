@@ -10,11 +10,12 @@ authors = [
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.12"
+python = ">=3.12,<3.13"
 jupyter = "^1.1.1"
 torch = {version = "^2.4.1+cu124", source = "pytorch-gpu"}
 torchvision = {version = "^0.19.1+cu124", source = "pytorch-gpu"}
 ultralytics = "^8.3.3"
+mlflow = "^2.16.2"
 
 
 [[tool.poetry.source]]

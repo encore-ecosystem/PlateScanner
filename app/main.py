@@ -1,5 +1,5 @@
 from ultralytics import YOLO
-from src import DATA_PATH, RESULTS_DIR
+from app.src import DATA_PATH, RESULTS_DIR
 
 
 def main():
