@@ -1,3 +1,12 @@
+# Dataset
+dataset
+
+# Result
+results
+
+# Video
+videos
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
