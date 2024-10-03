@@ -10,12 +10,10 @@ services:
       - ./mlops/minio_data:/data
     ports:
       - "9000:9000"
-    networks:
-      - minio_network
     restart: always
     environment:
-      - MINIO_ROOT_USER=${AWS_ACCESS_KEY_ID}
-      - MINIO_ROOT_PASSWORD=${AWS_SECRET_ACCESS_KEY}
+      - MINIO_ROOT_USER=${MINIO_ROOT_USER}
+      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
     command: server /data
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:9000/minio/health/live" ]
@@ -31,8 +29,6 @@ services:
       - ./mlops/config:/root/.mc
     depends_on:
       - minio
-    networks:
-      - minio_network
     entrypoint: >
       /bin/sh -c "
       /usr/bin/mc config host rm minio;
@@ -40,35 +36,35 @@ services:
       sleep infinity;
       "
 
-  db:
-    restart: always
-    image: mysql/mysql-server:latest
-    container_name: mlflow_db
+  mlflow_database:
+#    restart: always
+    image: postgres:17
+    container_name: mlflow_database
     ports:
-      - "3306:3306"
+      - "5432:5432"
     environment:
-      - MYSQL_DATABASE=${MYSQL_DATABASE}
-      - MYSQL_USER=${MYSQL_USER}
-      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
-      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     volumes:
-      - ./mlflow/dbdata:/var/lib/mysql
+      - ./mlops/dbdata:/var/lib/mysql
 
-  web:
+  mlflow:
     restart: always
-    build: ../mlops/mlflow
-    container_name: mlflow_server
+    build: ./mlops/mlflow
+    container_name: mlflow
     depends_on:
       - minio-client
-      - db
+      - mlflow_database
     ports:
       - "5000:5000"
     environment:
       - MLFLOW_S3_ENDPOINT_URL=http://minio:9000
-      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
-      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
-    command: mlflow server --backend-store-uri mysql+pymysql://${MYSQL_USER}:${MYSQL_PASSWORD}@db:3306/${MYSQL_DATABASE} --default-artifact-root s3://mlflow/ --host 0.0.0.0
-
-
-networks:
-  minio_network:
+      - AWS_ACCESS_KEY_ID=${MINIO_ROOT_USER}
+      - AWS_SECRET_ACCESS_KEY=${MINIO_ROOT_PASSWORD}
+    command: [
+      "mlflow", "server",
+      "--backend-store-uri", "mlflow_database://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_DB}:5432/mlflow",
+      "--default-artifact-root", "/mlflow/artifacts",
+      "--host", "0.0.0.0"
+    ]

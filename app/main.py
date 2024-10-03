@@ -21,4 +21,8 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    # main()
+    import time
+    while True:
+        print("All works fine!")
+        time.sleep(5)
