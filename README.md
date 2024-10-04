@@ -7,5 +7,5 @@ docker build -t platescanner .
 
 To train yolo in bash
 ```bash
-yolo detect train data=dataset\data.yaml model="yolov8n.yaml" epochs=1
+yolo detect train datasets=dataset\data.yaml model="yolov8n.yaml" epochs=1
 ```

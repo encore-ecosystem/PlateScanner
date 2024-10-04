@@ -1,13 +1,42 @@
-services:
-  app:
-    build: ./app
-    container_name: plate_scanner_service
+# PORTS
+# Minio      : 9000
+# PG_Mlflow  : 5432
+# MLFlow     : 5000
+# PG_Airflow : 5433
+# Redis      : 6379
+# Airflow    : 8080
+# Flower     : 5555
+#
 
+services:
+  # ===================
+  # MLFlow
+  # ===================
+  mlflow:
+    container_name: mlflow
+    build:
+      context: ./mlflow
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    environment:
+      - MLFLOW_S3_ENDPOINT_URL=http://minio:9000
+      - AWS_ACCESS_KEY_ID=${MINIO_ROOT_USER}
+      - AWS_SECRET_ACCESS_KEY=${MINIO_ROOT_PASSWORD}
+    command: [
+      "mlflow", "server",
+      "--backend-store-uri", "postgres_mlflow://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_DB}:5432/mlflow",
+      "--default-artifact-root", "/mlflow/artifacts",
+      "--host", "0.0.0.0"
+    ]
+    depends_on:
+      - minio-client
+      - postgres_mlflow
   minio:
     container_name: minio
     image: minio/minio:latest
     volumes:
-      - ./mlops/minio_data:/data
+      - ./mlflow/minio:/data
     ports:
       - "9000:9000"
     restart: always
@@ -20,13 +49,12 @@ services:
       interval: 30s
       timeout: 20s
       retries: 3
-
   minio-client:
     container_name: minio-client
     restart: always
     image: minio/mc:latest
     volumes:
-      - ./mlops/config:/root/.mc
+      - ./mlflow/minio_client_config:/root/.mc
     depends_on:
       - minio
     entrypoint: >
@@ -36,10 +64,9 @@ services:
       sleep infinity;
       "
 
-  mlflow_database:
-#    restart: always
+  postgres_mlflow:
     image: postgres:17
-    container_name: mlflow_database
+    container_name: postgres_mlflow
     ports:
       - "5432:5432"
     environment:
@@ -47,24 +74,44 @@ services:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     volumes:
-      - ./mlops/dbdata:/var/lib/mysql
+      - ./mlflow/postgres:/var/lib/postgresql/data
 
-  mlflow:
-    restart: always
-    build: ./mlops/mlflow
-    container_name: mlflow
-    depends_on:
-      - minio-client
-      - mlflow_database
+
+  # ====================
+  # Airflow
+  # ====================
+  airflow:
+    build:
+      context: ./airflow
+      dockerfile: Dockerfile
+    container_name: airflow
     ports:
-      - "5000:5000"
-    environment:
-      - MLFLOW_S3_ENDPOINT_URL=http://minio:9000
-      - AWS_ACCESS_KEY_ID=${MINIO_ROOT_USER}
-      - AWS_SECRET_ACCESS_KEY=${MINIO_ROOT_PASSWORD}
-    command: [
-      "mlflow", "server",
-      "--backend-store-uri", "mlflow_database://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_DB}:5432/mlflow",
-      "--default-artifact-root", "/mlflow/artifacts",
-      "--host", "0.0.0.0"
-    ]
+      - "8080:8080"
+    depends_on:
+      - mlflow
+    volumes:
+      - ./airflow/airflow_env/artifacts:/tmp/airflow/artifacts/
+      - ./mlflow/artifacts:/mlflow/artifacts
+      - ./airflow/dags:/opt/airflow/dags
+    command: standalone
+
+  # ===========
+  # Jupyter
+  # ===========
+#  jupyter:
+#    build:
+#      context: ./docker
+#      dockerfile: Dockerfile.jupyter
+#    container_name: jupyter
+#    ports:
+#      - '8888:8888'
+#    volumes:
+#      - './notebook:/home/jovyan/work'
+#    networks:
+#      - mlflow
+#    environment:
+#      - JUPYTER_ENABLE_LAB=yes
+#      - JUPYTER_TOKEN=mlflow
+#      - AWS_ACCESS_KEY_ID=mlflow
+#      - AWS_SECRET_ACCESS_KEY=password
+#      - MLFLOW_S3_ENDPOINT_URL=http://minio:9000

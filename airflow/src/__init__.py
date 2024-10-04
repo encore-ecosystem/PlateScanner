@@ -3,7 +3,7 @@ from pathlib import Path
 # ================
 # Constants
 # ================
-DATA_PATH   = Path() / 'dataset' / 'data.yaml'
+DATA_PATH   = Path() / 'dataset' / 'datasets.yaml'
 RESULTS_DIR = Path() / 'results' / 'training'
 
 
