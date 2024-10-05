@@ -1,8 +1,8 @@
 from ultralytics import YOLO, settings
 from src import DATA_PATH
-import mlflow
+# import mlflow
 
-settings.update({"mlflow": True})
+settings.update({"mlflow": False})
 settings.reset()
 
 config = {
@@ -15,30 +15,30 @@ config = {
 
 
 def main():
-    mlflow.set_tracking_uri(uri="http://127.0.0.1:5000")
+    # mlflow.set_tracking_uri(uri="http://localhost:5000")
+    #
+    # # set the experiment id
+    # ## experiment_name="YOLOv8 Basic Usage of MLFlow"
+    # mlflow.set_experiment(experiment_id="0")
 
-    mlflow.set_experiment("YOLOv8 Basic Usage of MLFlow")
-    experiment = mlflow.get_experiment_by_name("YOLOv8 Basic Usage of MLFlow")
-    client = mlflow.tracking.MlflowClient()
-    run = client.create_run(experiment.experiment_id)
-    
-    with mlflow.start_run(run_id=run.info.run_id):
+    # start run
+    # with mlflow.start_run():
         # Logging parameters
-        mlflow.log_param("epochs", config["epochs"])
-        mlflow.log_param("batch_size", config["batch"])
-        mlflow.log_param("img_size", config["imgsz"])
-        mlflow.log_param("data_path", config["data"])
-        mlflow.log_param("experiment_name", config["name"])
+        # mlflow.log_param("epochs", config["epochs"])
+        # mlflow.log_param("batch_size", config["batch"])
+        # mlflow.log_param("img_size", config["imgsz"])
+        # mlflow.log_param("data_path", config["data"])
+        # mlflow.log_param("experiment_name", config["name"])
 
         # Load and train your YOLOv8 model
-        model = YOLO("yolov8n.pt")
-        results = model.train(
-            data=config["data"],
-            epochs=config["epochs"],
-            batch=config["batch"],
-            name=config["name"],
-            imgsz=config["imgsz"],
-        )
+    model = YOLO("yolov8n.pt")
+    results = model.train(
+        data=config["data"],
+        epochs=config["epochs"],
+        batch=config["batch"],
+        name=config["name"],
+        imgsz=config["imgsz"],
+    )
         #
         # # Metrics
         # metrics = results.metrics
@@ -52,8 +52,4 @@ def main():
 
 
 if __name__ == '__main__':
-    # main()
-    import time
-    while True:
-        print("All works fine!")
-        time.sleep(5)
+    main()
