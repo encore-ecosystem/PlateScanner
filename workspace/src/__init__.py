@@ -3,7 +3,7 @@ from pathlib import Path
 # ================
 # Constants
 # ================
-DATA_PATH   = Path() / 'dataset' / 'detection'
+DATA_PATH   = Path().resolve() / 'dataset' / 'detection'
 
 
 __all__ = [

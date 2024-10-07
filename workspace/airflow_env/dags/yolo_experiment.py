@@ -34,7 +34,3 @@ def main():
     # Train the model
     # If running remotely, the arguments may be overridden by ClearML if they were changed in the UI
     results = model.train(**args)
-
-
-if __name__ == '__main__':
-    main()

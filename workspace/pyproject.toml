@@ -16,6 +16,8 @@ torch = {version = "^2.4.1+cu124", source = "pytorch-gpu"}
 torchvision = {version = "^0.19.1+cu124", source = "pytorch-gpu"}
 ultralytics = "^8.3.3"
 clearml = "^1.16.4"
+apache-airflow = "^2.10.2"
+albumentations = "^1.4.17"
 
 
 [[tool.poetry.source]]
