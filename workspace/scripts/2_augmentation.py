@@ -7,8 +7,8 @@ import numpy as np
 import shutil
 import random
 
-INPUT_YOLO_DATASET  = DATA_PATH / 'AugmentedOnlyGray' / 'YOLO'
-OUTPUT_YOLO_DATASET = DATA_PATH / 'AugmentedAll' / 'YOLO'
+INPUT_YOLO_DATASET  = DATA_PATH / 'Merged' / 'YOLO'
+OUTPUT_YOLO_DATASET = DATA_PATH / 'AugmentedGray' / 'YOLO'
 
 def random_hash(k: int = 256):
     return hex(random.getrandbits(k))[2:]
@@ -23,7 +23,9 @@ def main():
     transform = albumentations.Compose([
         albumentations.Blur(blur_limit=(3, 7), p=1),
         albumentations.GaussNoise(var_limit=(10., 50.), p=1),
-        #albumentations.ToGray(p=1,),
+
+        albumentations.CLAHE(p=1),
+        albumentations.ToGray(p=1),
     ])
 
     for type_ in ['train', 'valid', 'test']:
@@ -39,8 +41,7 @@ def main():
             image_new_id = random_hash()
 
             image = np.array(Image.open(image_path))
-
-            transformed = Image.fromarray(transform(image=image)['image'])
+            transformed = Image.fromarray(transform(image=image)['image'].astype(np.uint8))
             transformed.save(OUTPUT_YOLO_DATASET / type_ / 'images' / (image_new_id + '.jpg'))
 
             shutil.copy(

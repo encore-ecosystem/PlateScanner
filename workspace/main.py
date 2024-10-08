@@ -6,19 +6,19 @@ from src import DATA_PATH
 MODEL = 'YOLOv5nu'
 
 config = {
-    "batch": 4,
+    "batch": 8,
     "imgsz": 1280,
     "epochs": 20,
     "name": MODEL,
-    "data": DATA_PATH / 'AugmentedAll' / 'YOLO' / 'data.yaml',
+    "data": DATA_PATH / 'AUGMerged' / 'YOLO' / 'data.yaml',
 }
 
 
 def main():
     # Create a ClearML Task
     task = Task.init(
-        project_name="Testing Yolo",
-        task_name="my yolo task 1"
+        project_name = "PlateScanner",
+        task_name    = "Testing YOLOv5nu on augmented dataset"
     )
 
     # Load a model

@@ -5,8 +5,8 @@ from src.data_utils.adapters import AdapterOutputType, AutoAdapter
 
 def main():
     datasets = [
-        DATA_PATH / 'AugmentedAll'      / 'YOLO',
-        DATA_PATH / 'AugmentedOnlyGray' / 'YOLO',
+        DATA_PATH / 'AugmentedFull' / 'YOLO',
+        DATA_PATH / 'AugmentedGray' / 'YOLO',
     ]
     dataset = Combiner.merge(
         adapters    = [AutoAdapter(dataset_path=path) for path in datasets],
