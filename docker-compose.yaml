@@ -152,15 +152,15 @@ services:
       - clearml_config:/opt/clearml/config
 
 
-  airflow:
-    build: ./workspace
-    container_name: airflow
-    ports:
-      - "7080:8080"
-    volumes:
-      - airflow_artifacts:/tmp/airflow/artifacts/
-      - airflow_dags:/opt/airflow/dags
-    command: standalone
+#  airflow:
+#    build: ./workspace
+#    container_name: airflow
+#    ports:
+#      - "7080:8080"
+#    volumes:
+#      - airflow_artifacts:/tmp/airflow/artifacts/
+#      - airflow_dags:/opt/airflow/dags
+#    command: standalone
 
 
 volumes:

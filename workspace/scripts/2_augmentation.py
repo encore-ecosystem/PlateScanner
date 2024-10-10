@@ -7,8 +7,8 @@ import numpy as np
 import shutil
 import random
 
-INPUT_YOLO_DATASET  = DATA_PATH / 'Merged' / 'YOLO'
-OUTPUT_YOLO_DATASET = DATA_PATH / 'AugmentedGray' / 'YOLO'
+INPUT_YOLO_DATASET  = DATA_PATH / 'Merged'
+OUTPUT_YOLO_DATASET = DATA_PATH / 'AugmentedFull' / 'YOLO'
 
 def random_hash(k: int = 256):
     return hex(random.getrandbits(k))[2:]
@@ -21,8 +21,8 @@ def main():
     shutil.copy(src=INPUT_YOLO_DATASET / 'data.yaml', dst=OUTPUT_YOLO_DATASET / 'data.yaml')
 
     transform = albumentations.Compose([
-        albumentations.Blur(blur_limit=(3, 7), p=1),
-        albumentations.GaussNoise(var_limit=(10., 50.), p=1),
+        # albumentations.Blur(blur_limit=(3, 7), p=1),
+        # albumentations.GaussNoise(var_limit=(10., 50.), p=1),
 
         albumentations.CLAHE(p=1),
         albumentations.ToGray(p=1),
