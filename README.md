@@ -1,11 +1,9 @@
 # PlateScanner
 
-To build project use:
+To install dependencies use the following command from the repository root folder:
 ```bash
-docker build -t platescanner .
-```
-
-To train yolo in bash
-```bash
-yolo detect train datasets=dataset\data.yaml model="yolov8n.yaml" epochs=1
+pip install poetry
+poetry shell
+poetry install
+python main.py <input_abs_folder> <output_abs_folder> [--model <model> --confidence <confidence level> (both optional)] 
 ```
