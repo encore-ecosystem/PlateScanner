@@ -1,9 +1,46 @@
 # PlateScanner
 
-To install dependencies use the following command from the repository root folder:
+<p style="text-align: center;">
+    <img alt="Logo" height="800" src="PlateScanner\src\external\plate_main.png" width="800"/>
+</p>
+
+
+Добро пожаловать в **PlateScanner**! Этот проект разработан для эффективного и точного распознавания номерных знаков. Наша цель – предоставить надежное решение, которое использует современные алгоритмы для распознавания и извлечения информации о номерных знаках из изображений и видео.
+
+## Начало работы 
+Для начала работы с **PlateScanner** убедитесь, что у вас установлена версия ***Python 3.12*** или выше. Этот проект требует нескольких зависимостей, которые можно легко управлять с помощью **Poetry**. Ниже приведены шаги для настройки проекта:
+
+### Предварительные требования
+- **Python 3.12** или выше
+- Менеджер пакетов **Poetry**
+
+### Шаги установки
+1. **Клонируйте репозиторий** на свой локальный компьютер:
 ```bash
-pip install poetry
-poetry shell
-poetry install
-python main.py <input_abs_folder> <output_abs_folder> [--model <model> --confidence <confidence level> (both optional)] 
+git clone https://github.com/encore-ecosystem/PlateScanner.git
 ```
+
+2. **Перейдите в каталог** проекта:
+```bash
+cd PlateScanner
+```
+
+3. **Установите зависимости** с помощью Poetry:
+```bash
+pip install poetry # Если не установлен менеджер пакетов Poetry
+poetry shell # Запуск виртуального окружения Poetry
+poetry install
+```
+## Запуск приложения
+Чтобы запустить приложение **PlateScanner**, используйте следующую команду:
+```bash
+python main.py <путь_к_входной_папке> <путь_к_выходной_папке> [--model <модель> --confidence <уровень_доверия> (оба параметра необязательные)]
+```
+ - **<путь_к_входной_папке>**: Укажите абсолютный путь к папке, содержащей входные изображения или видео.
+ - **<путь_к_выходной_папке>**: Укажите абсолютный путь к папке, где будут сохранены результаты.
+ - **--model <модель>**: (Необязательный) Укажите пользовательскую модель в папке *Platescanner/model* проекта для распознавания.
+ - **--confidence <уровень_доверия>**: (Необязательный) Укажите уровень доверия для детекции.
+
+ # License
+
+Access to the software is provided in accordance with [EULA](LICENSE).
