@@ -1,7 +1,7 @@
-# PlateScanner
+<h1 style="text-align: center; margin-bottom: 40px;">PlateScanner</h1>
 
 <p style="text-align: center;">
-    <img alt="Logo" height="800" src="PlateScanner\src\external\plate_main.png" width="800"/>
+    <img alt="Logo" height="800" src="src\external\plate_main.png" width="800"/>
 </p>
 
 
