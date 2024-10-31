@@ -3,14 +3,13 @@ import os
 import cv2
 import albumentations as A
 
-input_folder = DATA_PATH / 'target pictures'
-output_folder = DATA_PATH / 'target pictures aug'
+input_folder  = DATA_PATH.resolve().parent.parent.parent / 'dataset' / 'detection' / 'TargetRAW'
+output_folder = DATA_PATH.resolve().parent.parent.parent / 'dataset' / 'detection' / 'TargetAUG'
 
-os.makedirs(output_folder, exist_ok=True)
+output_folder.mkdir(exist_ok=True, parents=True)
 
 transform = A.Compose([
     A.CLAHE(p=1),
-    A.ToGray(p=1),
 ])
 
 for filename in os.listdir(input_folder):
