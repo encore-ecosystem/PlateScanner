@@ -11,12 +11,12 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = ">=3.12,<3.13"
-torch = {version = "^2.4.1+cu124", source = "pytorch-gpu"}
-torchvision = {version = "^0.19.1+cu124", source = "pytorch-gpu"}
+torch = {version = "^2.5.1+cu124", source = "pytorch-gpu"}
+torchvision = {version = "^0.20.1+cu124", source = "pytorch-gpu"}
 ultralytics = "^8.3.3"
 clearml = "^1.16.4"
 albumentations = "^1.4.17"
-nodeflow = "^0.0.2"
+nodeflow = "^0.0.4"
 pycocotools = "^2.0.8"
 
 
