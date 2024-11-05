@@ -11,7 +11,10 @@ def bbox_iou(bbox_A, bbox_B) -> float:
 
     bbox_a_area = (bbox_A[2] - bbox_A[0]) * (bbox_A[3] - bbox_A[1])
     bbox_b_area = (bbox_B[2] - bbox_B[0]) * (bbox_B[3] - bbox_B[1])
-    iou = inter_area / (bbox_a_area + bbox_b_area - inter_area)
+    try:
+        iou = inter_area / (bbox_a_area + bbox_b_area - inter_area)
+    except ZeroDivisionError:
+        iou = 0
     return iou
 
 
