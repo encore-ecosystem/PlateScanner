@@ -9,9 +9,10 @@ import os
 def main():
     # Parse args
     parser = argparse.ArgumentParser(
-        prog='PlateScanner',
-        description='<todo>',
-        epilog='<todo>')
+        prog        = 'PlateScanner',
+        description = '<todo>',
+        epilog      = '<todo>',
+    )
     parser.add_argument('input_dir')
     parser.add_argument('output_dir')
     parser.add_argument('-m', '--model'      , type=str,   default='yolov5nu')

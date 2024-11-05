@@ -9,7 +9,8 @@ def train_yolo(model_path: PathVariable, dataset_path: PathVariable, imgsz: Inte
         "imgsz"       : imgsz.value,
         "epochs"      : epochs.value,
         "data"        : (dataset_path / 'data.yaml').__str__(),
-        "save_period" : 2
+        "save_period" : 2,
+        "augment"     : True,
     }
     (__train_yolo_with_clearml if use_clearml.value else __train_yolo_without_clearml)(model_path, config)
     return Result(value=True)
@@ -18,7 +19,7 @@ def __train_yolo_with_clearml(model_path: PathVariable, config: dict):
     model_variant = model_path.value.stem
     task = Task.init(
         project_name = "PlateScanner",
-        task_name    = f"Testing {model_variant} on augmented dataset"
+        task_name    = f"Testing nodeflow training on {model_variant}"
     )
     task.set_parameter(name="model_variant", value=model_variant)
     model = YOLO(model_path.value.__str__())

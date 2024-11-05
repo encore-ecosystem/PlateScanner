@@ -1,9 +1,10 @@
 from nodeflow.builtin import PathVariable, Integer, Boolean
 from nodeflow import Dispenser, func2node
 
+from src.model.model import Model
 from src.nodeflow_env import train_yolo, load_augmentations, Compose
 from src.utils import bbox_to_total_area_filter, nms
-from src.model import Model
+
 
 from ultralytics import YOLO
 from pathlib import Path
