@@ -1,5 +1,5 @@
 .idea
-./runs
-./dataset
+runs
+dataset
 yolo11n.pt
 __pycache__

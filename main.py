@@ -1,4 +1,4 @@
-from src.model import YoloV5
+from src.model import Yolo, YoloOBB
 from pathlib import Path
 from tqdm import tqdm
 import argparse
@@ -33,8 +33,7 @@ def main():
     assert f"{model.lower()}.pt" in os.listdir(root / 'model'), f"Unable to find model {model}"
 
     # Computation
-    model = YoloV5(root / 'model' / f"{model}.pt")
-
+    model = YoloOBB(root / 'model' / f"{model}.pt")
 
     for img_path in tqdm(os.listdir(input_dir), desc='Prediction'):
         results = model.predict(

@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from src.bbox.bbox_abs import Bbox
 
 
 class Model(ABC):
@@ -7,7 +8,7 @@ class Model(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def predict(self, *args, **kwargs):
+    def predict(self, *args, **kwargs) -> dict[str, Bbox]:
         raise NotImplementedError
 
 

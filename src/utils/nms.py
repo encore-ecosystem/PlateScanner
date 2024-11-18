@@ -1,19 +1,19 @@
 from src.utils.iou import bbox_iou
-# bbox: (x, y, x, y, confidence, category)
+from src.bbox.bbox_abs import Bbox
 
-def nms(bboxes: list, iou_threshold: float) -> list:
-    bboxes = tuple(tuple(x) for x in bboxes)
+
+def nms(bboxes: tuple[Bbox, ...], confidences: dict[Bbox, float], iou_threshold: float) -> tuple[Bbox, ...]:
     result_bboxes = set(bboxes)
     for bbox_A in bboxes:
         to_delete = set()
         for bbox_B in result_bboxes - {bbox_A}:
-            if bbox_A[5] == bbox_B[5] and bbox_iou(bbox_A, bbox_B) > iou_threshold:
-                if bbox_A[4] < bbox_B[4]:
+            if bbox_A.category == bbox_B.category and bbox_iou(bbox_A, bbox_B) > iou_threshold:
+                if confidences[bbox_A] < confidences[bbox_B]:
                     to_delete.add(bbox_A)
                 else:
                     to_delete.add(bbox_B)
         result_bboxes -= to_delete
-    return list(result_bboxes)
+    return tuple(result_bboxes)
 
 
 __all__ = [
