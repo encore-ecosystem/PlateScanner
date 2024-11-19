@@ -79,9 +79,13 @@ class Validator:
                                  predicted_bboxes: dict[str, list[Bbox]],
                                  criteria: CustomCategories,
                                  selected_category: int,
-                                 threshold=0.05):
+                                 threshold=0.4):
         filtered_original_bboxes = {}
         filtered_predicted_bboxes = {}
+
+        glob_TP = 0
+        glob_FP = 0
+        glob_FN = 0
 
         for image_name in original_bboxes.keys():
             for bbox, custom_criteria in original_bboxes[image_name]:
@@ -113,7 +117,6 @@ class Validator:
                         flag_orig = original_bbox
                         break
                 if flag:
-                    classified_bboxes.add(predicted_bbox)
                     classified_bboxes.add(flag_orig)
                     TP_counter += 1
 
@@ -121,9 +124,13 @@ class Validator:
 
             FN_counter = len(original_bboxes[image_name]) - TP_counter
 
+            glob_TP += TP_counter
+            glob_FP += FP_counter
+            glob_FN += FN_counter
 
             print(f"TP: {TP_counter} FP: {FP_counter} FN: {FN_counter}, len_orig {len(filtered_original_bboxes[image_name])}, len_pred {len(filtered_predicted_bboxes[image_name])} im_name: {image_name} ")
 
+        return glob_TP, glob_FP, glob_FN
 
 #
 # Folder with original labels

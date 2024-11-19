@@ -53,8 +53,8 @@ def parse_predicted(dataset_path: Path):
         bboxes.update(predicted_bboxes)
     return bboxes
 
-def plot_conf_matrix(tp, tn, fp):
-    conf_matrix = np.array([[tp, 0], [fp, tn]])
+def plot_conf_matrix(tp, fp, fn):
+    conf_matrix = np.array([[tp, fp], [fn, 0]])
 
     categories = ['Positive', 'Negative']
     fig, ax = plt.subplots(figsize=(6, 6))
@@ -90,7 +90,9 @@ def main():
     new_bboxes = v.predict(DATASET_PATH, original_bboxes)
 
     criteria = CustomCategories()
-    v.compute_confusion_matrix(new_bboxes, predicted_bboxes, criteria, selected_category = 0)
+    TP, FP, FN = v.compute_confusion_matrix(new_bboxes, predicted_bboxes, criteria, selected_category = 0)
+
+    plot_conf_matrix(TP, FP, FN)
 
     for image_stem in original_bboxes:
         if len(original_bboxes[image_stem]):
@@ -108,7 +110,7 @@ def main():
                     cx, cy = (bbox.bbox[0] * width, bbox.bbox[1] * height)
                     b_width, b_height = (bbox.bbox[2] * width, bbox.bbox[3] * height)
                     axs.add_patch(Rectangle((cx - b_width // 2, cy + b_height // 2 - b_height), width=b_width, height=b_height, edgecolor='red', fill=False))
-                    axs.text(cx - b_width // 2 - 100,  cy + b_height // 2 + 50, new_bboxes[image_stem][idx][1], color='red')
+                    axs.text(cx - b_width // 2 - 100,  cy + b_height // 2 + 50, new_bboxes[image_stem][idx][1], color='red', fontsize=6)
                 elif isinstance(bbox, BboxXYXY):
                     lup = (bbox.bbox[0] * width, bbox.bbox[1] * height)
                     rdp = (bbox.bbox[2] * width, bbox.bbox[3] * height)
