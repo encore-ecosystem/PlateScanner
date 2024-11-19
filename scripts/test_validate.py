@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle
-import  umpy as np
+import numpy as np
 
 from src.model import Yolo
 from src.bbox import BboxCWH, BboxPointBasedOBB

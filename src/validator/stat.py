@@ -101,31 +101,25 @@ class Validator:
         for image_name in filtered_predicted_bboxes.keys():
             classified_bboxes = set()
 
-            FN_counter = 0
-            for original_bbox, criteria in filtered_original_bboxes[image_name]:
-                if not any([bbox_iou(original_bbox, predicted_bbox) > threshold for predicted_bbox in
-                        filtered_predicted_bboxes[image_name] if predicted_bbox not in classified_bboxes]):
-                    FN_counter += 1
-
             TP_counter = 0
             for predicted_bbox in filtered_predicted_bboxes[image_name]:
                 flag = False
+                flag_orig = None
                 for original_bbox, custom_criteria in filtered_original_bboxes[image_name]:
-                    if bbox_iou(original_bbox, predicted_bbox) > threshold:
+                    if bbox_iou(original_bbox, predicted_bbox) > threshold and \
+                        original_bbox not in classified_bboxes and \
+                        predicted_bbox not in classified_bboxes:
                         flag = True
+                        flag_orig = original_bbox
                         break
-
                 if flag:
                     classified_bboxes.add(predicted_bbox)
+                    classified_bboxes.add(flag_orig)
                     TP_counter += 1
 
-            FP_counter = 0
-            for predicted_bbox in filtered_predicted_bboxes[image_name]:
-                if predicted_bbox in classified_bboxes:
-                    continue
-                if all([bbox_iou(original_bbox, predicted_bbox) < threshold for original_bbox, custom_criteria in filtered_original_bboxes[image_name]]):
-                    classified_bboxes.add(predicted_bbox)
-                    FP_counter += 1
+            FP_counter = len(predicted_bboxes[image_name]) - TP_counter
+
+            FN_counter = len(original_bboxes[image_name]) - TP_counter
 
 
             print(f"TP: {TP_counter} FP: {FP_counter} FN: {FN_counter}, len_orig {len(filtered_original_bboxes[image_name])}, len_pred {len(filtered_predicted_bboxes[image_name])} im_name: {image_name} ")
