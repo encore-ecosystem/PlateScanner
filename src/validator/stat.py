@@ -12,7 +12,9 @@ from src.utils import bbox_iou
 
 class Validator:
     def __init__(self):
-        pass
+        self.brightnesses_percentile_point        = None
+        self.bbox_size_ratios_percentile_point_33 = None
+        self.bbox_size_ratios_percentile_point_66 = None
 
     def fit_brightness(self, dataset_path: Path):
         average_brightnesses = []
@@ -28,7 +30,7 @@ class Validator:
     def fit_distance(self, dataset_path: Path, bboxes: dict[str, list[Bbox]]):
         average_bbox_size_ratios = []
 
-        for image_path in (dataset_path / 'valid' / 'images_old_pred').glob("*"):
+        for image_path in (dataset_path / 'valid' / 'images').glob("*"):
             image = cv2.imread(image_path)
             image_area = image.shape[0] * image.shape[1]
             image_bboxes = bboxes[image_path.stem]
@@ -39,10 +41,10 @@ class Validator:
         self.bbox_size_ratios_percentile_point_33 = np.percentile(average_bbox_size_ratios, 33)
         self.bbox_size_ratios_percentile_point_66 = np.percentile(average_bbox_size_ratios, 66)
 
-    def predict(self, dataset_path: Path, bboxes: dict[str, list[Bbox]]):
+    def predict(self, dataset_path: Path, bboxes: dict[str, list[Bbox]]) -> dict[str, list[tuple[Bbox, CustomCategories]]]:
         new_bboxes = {}
 
-        for image_path in (dataset_path / 'valid' / 'images_old_pred').glob("*"):
+        for image_path in (dataset_path / 'valid' / 'images').glob("*"):
             image = cv2.imread(image_path)
             gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
             mean_brightness = np.mean(gray_image)
@@ -69,17 +71,16 @@ class Validator:
                     custom_categories.distance = Distance.CLOSE
 
                 new_bboxes[image_path.stem] = new_bboxes.get(image_path.stem, []) + [(bbox, custom_categories)]
-
-        print(new_bboxes)
-
         return new_bboxes
 
-    def compute_confusion_matrix(self,
-                                 original_bboxes: dict[str, list[tuple[Bbox, CustomCategories]]],
-                                 predicted_bboxes: dict[str, list[Bbox]],
-                                 criteria: CustomCategories,
-                                 selected_category: int,
-                                 threshold=0.4):
+    @staticmethod
+    def compute_confusion_matrix(
+            original_bboxes   : dict[str, list[tuple[Bbox, CustomCategories]]],
+            predicted_bboxes  : dict[str, list[Bbox]],
+            criteria          : CustomCategories,
+            selected_category : int,
+            threshold         : float = 0.4
+    ):
         filtered_original_bboxes = {}
         filtered_predicted_bboxes = {}
 
@@ -88,14 +89,14 @@ class Validator:
         glob_FN = 0
 
         for image_name in original_bboxes.keys():
-            for bbox, custom_criteria in original_bboxes[image_name]:
+            for bbox, bbox_criteria in original_bboxes[image_name]:
                 if bbox.category != selected_category:
                     continue
-                if not (custom_criteria.time != criteria.time or custom_criteria.time == 0):
+                if not (bbox_criteria.time != criteria.time or criteria.time is None):
                     continue
-                if not (custom_criteria.distance != criteria.distance or custom_criteria.distance == 0):
+                if not (bbox_criteria.distance != criteria.distance or criteria.distance is None):
                     continue
-                filtered_original_bboxes[image_name] = filtered_original_bboxes.get(image_name, []) + [(bbox, custom_criteria)]
+                filtered_original_bboxes[image_name] = filtered_original_bboxes.get(image_name, []) + [(bbox, bbox_criteria)]
 
         for image_name in predicted_bboxes.keys():
             for bbox in predicted_bboxes[image_name]:
@@ -109,7 +110,7 @@ class Validator:
             for predicted_bbox in filtered_predicted_bboxes[image_name]:
                 flag = False
                 flag_orig = None
-                for original_bbox, custom_criteria in filtered_original_bboxes[image_name]:
+                for original_bbox, bbox_criteria in filtered_original_bboxes[image_name]:
                     if bbox_iou(original_bbox, predicted_bbox) > threshold and \
                         original_bbox not in classified_bboxes and \
                         predicted_bbox not in classified_bboxes:
@@ -127,17 +128,9 @@ class Validator:
             glob_TP += TP_counter
             glob_FP += FP_counter
             glob_FN += FN_counter
-
-            print(f"TP: {TP_counter} FP: {FP_counter} FN: {FN_counter}, len_orig {len(filtered_original_bboxes[image_name])}, len_pred {len(filtered_predicted_bboxes[image_name])} im_name: {image_name} ")
-
         return glob_TP, glob_FP, glob_FN
 
-#
-# Folder with original labels
-# Dict[filename : bbox_structure]
-# Dataset_path <- filename; img -> 0/1
-# 
 
-#
-# Folder with predicted labels
-#
+__all__ = [
+    'Validator'
+]

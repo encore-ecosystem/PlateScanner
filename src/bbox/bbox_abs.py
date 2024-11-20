@@ -2,12 +2,17 @@ from abc import ABC, abstractmethod
 
 
 class Bbox(ABC):
-    def __init__(self, bbox: tuple[float, ...], category: int = -1):
-        self.bbox     = tuple(bbox)
-        self.category = category
+    def __init__(self, bbox: tuple[float, ...], category: int = -1, confidence: float = 0):
+        self.bbox       = tuple(bbox)
+        self.category   = category
+        self.confidence = confidence
 
     @abstractmethod
     def area(self) -> float:
+        raise NotImplementedError
+
+    @abstractmethod
+    def get_poly(self) -> list[tuple[float, float]]:
         raise NotImplementedError
 
     @abstractmethod
@@ -21,7 +26,8 @@ class Bbox(ABC):
         return self.bbox == other.bbox
 
     def __repr__(self) -> str:
-        return f"{self.__class__.__name__}({self.category}: {self.bbox})"
+        return f"{self.__class__.__name__}({self.category}: {self.bbox} {self.confidence:.2f})"
+
 
 __all__ = [
     'Bbox'

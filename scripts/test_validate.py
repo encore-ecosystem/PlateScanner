@@ -116,7 +116,6 @@ def main():
                     rdp = (bbox.bbox[2] * width, bbox.bbox[3] * height)
                     b_width, b_height = rdp[0] - lup[0], rdp[1] - lup[1]
                     axs.add_patch(Rectangle((lup[0], lup[1]), width=b_width, height=b_height, edgecolor = 'red', fill = False))
-                    # axs.text(lup[0] + 100, lup[1] + 100, new_bboxes[image_stem][1])
 
                 elif isinstance(bbox, BboxPointBasedOBB):
                     ...
@@ -131,7 +130,6 @@ def main():
                     rdp = (bbox.bbox[2] * width, bbox.bbox[3] * height)
                     b_width, b_height = rdp[0] - lup[0], rdp[1] - lup[1]
                     axs.add_patch(Rectangle((lup[0], lup[1]), width=b_width, height=b_height, edgecolor = 'green', fill = False))
-                    # axs.text(lup[0] + 100, lup[1] + 100, new_bboxes[image_stem][1])
 
                 elif isinstance(bbox, BboxPointBasedOBB):
                     ...

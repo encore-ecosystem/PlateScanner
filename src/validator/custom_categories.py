@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from enum import Enum
+from typing import Optional
 
 
 class Distance(Enum):
@@ -16,8 +17,8 @@ class Time(Enum):
 @dataclass
 class CustomCategories:
     def __init__(self):
-        self.distance = 0
-        self.time = 0
+        self.distance: Optional[Distance] = None
+        self.time    : Optional[Time]     = None
 
     def __repr__(self):
         return f"{self.distance}, {self.time}"
