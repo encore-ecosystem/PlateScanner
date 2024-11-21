@@ -7,7 +7,7 @@ def main():
     Yolo(
         weights_path=Path(__file__).parent.parent / 'model' / 'yolo11n-obb.pt'
     ).fit(
-        dataset_path=Path(__file__).parent.parent / 'dataset' / 'detection' / 'obb_dataset_target',
+        dataset_path=Path(__file__).parent.parent / 'dataset' / 'detection' / 'obb_dataset',
         augmentation=albumentations.Compose([
             albumentations.RandomRain(p=0.5, brightness_coefficient=1),
             # albumentations.Morphological(p=0.4, operation="erosion"),

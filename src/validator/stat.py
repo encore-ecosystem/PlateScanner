@@ -6,7 +6,7 @@ import numpy as np
 from pathlib import Path
 
 from src.bbox.bbox_abs import Bbox
-from src.validator.custom_categories import CustomCategories, Time, Distance
+from src.validator.criteria import CustomCriteria, Time, Distance
 from src.utils import bbox_iou
 
 
@@ -41,7 +41,7 @@ class Validator:
         self.bbox_size_ratios_percentile_point_33 = np.percentile(average_bbox_size_ratios, 33)
         self.bbox_size_ratios_percentile_point_66 = np.percentile(average_bbox_size_ratios, 66)
 
-    def predict(self, dataset_path: Path, bboxes: dict[str, list[Bbox]]) -> dict[str, list[tuple[Bbox, CustomCategories]]]:
+    def predict(self, dataset_path: Path, bboxes: dict[str, list[Bbox]]) -> dict[str, list[tuple[Bbox, CustomCriteria]]]:
         new_bboxes = {}
 
         for image_path in (dataset_path / 'valid' / 'images').glob("*"):
@@ -56,8 +56,9 @@ class Validator:
             else:
                 time = Time.NIGHT
 
+            new_bboxes[image_path.stem] = new_bboxes.get(image_path.stem, [])
             for bbox in bboxes[image_path.stem]:
-                custom_categories = CustomCategories()
+                custom_categories = CustomCriteria()
 
                 custom_categories.time = time
 
@@ -70,17 +71,17 @@ class Validator:
                 else:
                     custom_categories.distance = Distance.CLOSE
 
-                new_bboxes[image_path.stem] = new_bboxes.get(image_path.stem, []) + [(bbox, custom_categories)]
+                new_bboxes[image_path.stem] += [(bbox, custom_categories)]
         return new_bboxes
 
     @staticmethod
     def compute_confusion_matrix(
-            original_bboxes   : dict[str, list[tuple[Bbox, CustomCategories]]],
-            predicted_bboxes  : dict[str, list[Bbox]],
-            criteria          : CustomCategories,
+            original_bboxes   : dict[str, list[tuple[Bbox, CustomCriteria]]],
+            predicted_bboxes  : dict[str, list[tuple[Bbox, CustomCriteria]]],
+            criteria          : CustomCriteria,
             selected_category : int,
             threshold         : float = 0.4
-    ):
+    ) -> tuple[list[tuple[Bbox, CustomCriteria]]:2, int:3]:
         filtered_original_bboxes = {}
         filtered_predicted_bboxes = {}
 
@@ -89,28 +90,35 @@ class Validator:
         glob_FN = 0
 
         for image_name in original_bboxes.keys():
+            filtered_original_bboxes[image_name] = filtered_original_bboxes.get(image_name, [])
             for bbox, bbox_criteria in original_bboxes[image_name]:
                 if bbox.category != selected_category:
                     continue
-                if not (bbox_criteria.time != criteria.time or criteria.time is None):
+                if bbox_criteria != criteria:
                     continue
-                if not (bbox_criteria.distance != criteria.distance or criteria.distance is None):
-                    continue
-                filtered_original_bboxes[image_name] = filtered_original_bboxes.get(image_name, []) + [(bbox, bbox_criteria)]
+                filtered_original_bboxes[image_name] += [(bbox, bbox_criteria)]
 
         for image_name in predicted_bboxes.keys():
-            for bbox in predicted_bboxes[image_name]:
-                if bbox.category == selected_category:
-                    filtered_predicted_bboxes[image_name] = filtered_predicted_bboxes.get(image_name, []) + [bbox]
+            filtered_predicted_bboxes[image_name] = []
+            for predicted_bbox, bbox_criteria in predicted_bboxes[image_name]:
+                for original_bbox, original_criteria in original_bboxes[image_name]:
+                    if bbox_iou(original_bbox, predicted_bbox) > threshold:
+                        bbox_criteria.distance = original_criteria.distance
+                        bbox_criteria.time     = original_criteria.time
+                if predicted_bbox.category != selected_category:
+                    continue
+                if bbox_criteria != criteria:
+                    continue
+                filtered_predicted_bboxes[image_name] += [(predicted_bbox, bbox_criteria)]
 
         for image_name in filtered_predicted_bboxes.keys():
             classified_bboxes = set()
 
             TP_counter = 0
-            for predicted_bbox in filtered_predicted_bboxes[image_name]:
+            for predicted_bbox, _ in filtered_predicted_bboxes[image_name]:
                 flag = False
                 flag_orig = None
-                for original_bbox, bbox_criteria in filtered_original_bboxes[image_name]:
+                for original_bbox, _ in filtered_original_bboxes[image_name]:
                     if bbox_iou(original_bbox, predicted_bbox) > threshold and \
                         original_bbox not in classified_bboxes and \
                         predicted_bbox not in classified_bboxes:
@@ -121,14 +129,14 @@ class Validator:
                     classified_bboxes.add(flag_orig)
                     TP_counter += 1
 
-            FP_counter = len(predicted_bboxes[image_name]) - TP_counter
-
-            FN_counter = len(original_bboxes[image_name]) - TP_counter
+            FP_counter = len(filtered_predicted_bboxes[image_name]) - TP_counter
+            FN_counter = len(filtered_original_bboxes[image_name])  - TP_counter
 
             glob_TP += TP_counter
             glob_FP += FP_counter
             glob_FN += FN_counter
-        return glob_TP, glob_FP, glob_FN
+
+        return filtered_predicted_bboxes, filtered_original_bboxes, glob_TP, glob_FP, glob_FN
 
 
 __all__ = [

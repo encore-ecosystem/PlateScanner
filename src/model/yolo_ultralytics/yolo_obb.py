@@ -21,10 +21,9 @@ class YoloOBB(YoloBase):
         image = Image.open(source)
         results = YOLO(self.weights_path).predict(source=image, conf=kwargs['conf'], verbose=False, augment=True)
 
-        confidence = {}
         bboxes = []
         for result in results:
-            for bbox_data in result.boxes.data.tolist():
+            for bbox_data in result.obb.data.tolist():
                 bbox = BboxPointBasedOBB((bbox_data[:8]), category=int(bbox_data[9]), confidence=bbox_data[8])
                 bboxes.append(bbox)
 
