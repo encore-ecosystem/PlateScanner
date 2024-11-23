@@ -5,12 +5,13 @@ import albumentations
 
 def main():
     Yolo(
-        weights_path=Path(__file__).parent.parent / 'model' / 'yolo11n-obb.pt'
+        weights_path=Path(__file__).parent.parent / 'model' / 'yolo11n.pt'
     ).fit(
-        dataset_path=Path(__file__).parent.parent / 'dataset' / 'detection' / 'obb_dataset',
+        dataset_path=Path(__file__).parent.parent / 'dataset' / 'detection' / 'dataset3',
         augmentation=albumentations.Compose([
             albumentations.RandomRain(p=0.5, brightness_coefficient=1),
-            # albumentations.Morphological(p=0.4, operation="erosion"),
+            # to do: Не работает тренировка на Morphological, исправить
+            #albumentations.Morphological(p=0.4, scale=(2, 3), operation="erosion"),
             albumentations.RandomBrightnessContrast(p=0.5),
 
             albumentations.CLAHE(always_apply=True),

@@ -16,8 +16,8 @@ from src.validator.stat import Validator
 CALIBRATION_DATASET = Path(__file__).parent.parent.parent.resolve() / 'calibration'
 models = {
     'yolo11n-obb'     : True,
+    'yolo11n'         : False,
     'yolo11x'         : False,
-    'yolo11x-overfit' : False,
     'yolov5nu'        : False,
 }
 
