@@ -5,5 +5,5 @@ To install dependencies use the following command from the repository root folde
 pip install poetry
 poetry shell
 poetry install
-python main.py <input_abs_folder> <output_abs_folder> [--model <model> --confidence <confidence level> (both optional)] 
+python main.py <input_abs_folder> <output_abs_folder> [--models <models> --confidence <confidence level> (both optional)] 
 ```

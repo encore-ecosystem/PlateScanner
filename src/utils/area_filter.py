@@ -1,8 +1,9 @@
-from src.bbox.bbox_abs import Bbox
+from src.bbox.abstract import Bbox
 
 
-def bbox_to_total_area_filter(bboxes: tuple[Bbox, ...], area_threshold: float) -> tuple[Bbox, ...]:
-    return tuple([bbox for bbox in bboxes if bbox.area() <= area_threshold])
+def bbox_to_total_area_filter(bboxes: list[Bbox], area_threshold: float) -> list[Bbox]:
+    result = [bbox for bbox in bboxes if bbox.area() <= area_threshold]
+    return result
 
 
 __all__ = [

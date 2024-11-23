@@ -5,7 +5,7 @@ import numpy as np
 
 from pathlib import Path
 
-from src.bbox.bbox_abs import Bbox
+from src.bbox.abstract import Bbox
 from src.validator.criteria import CustomCriteria, Time, Distance
 from src.utils import bbox_iou
 

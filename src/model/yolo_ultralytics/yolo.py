@@ -4,13 +4,13 @@ from src.utils import bbox_to_total_area_filter, nms
 from .abstract import YoloBase
 from ultralytics import YOLO
 from PIL import Image
-from src.bbox import BboxXYXY
+from src.bbox import Bbox_2xy
 from pathlib import Path
 
 
 class Yolo(YoloBase):
 
-    def predict(self, **kwargs: Unpack) -> dict[str, list[BboxXYXY]]:
+    def predict(self, **kwargs: Unpack) -> dict[str, list[Bbox_2xy]]:
         """
         :param kwargs:
             source     : path to image
@@ -26,7 +26,7 @@ class Yolo(YoloBase):
         bboxes     = []
         for result in results:
             for bbox_data in result.boxes.data.tolist():
-                bbox      = BboxXYXY(
+                bbox      = Bbox_2xy(
                     (bbox_data[0] / width, bbox_data[1] / height, bbox_data[2] / width, bbox_data[3] / height),
                     category=int(bbox_data[5]),
                     confidence=bbox_data[4],

@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from src.bbox.bbox_abs import Bbox
+from src.bbox.abstract import Bbox
 
 
 class Model(ABC):
