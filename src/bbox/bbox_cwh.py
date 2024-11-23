@@ -3,8 +3,9 @@ from shapely.geometry import Polygon
 
 
 class Bbox_CWH(Bbox):
-    def __init__(self, center_x: float, center_y: float, width: float, height: float, category: int = -1, confidence: float = 0):
-        super().__init__((center_x, center_y, width, height), category, confidence)
+    def __init__(self, points: list[float], category: int = -1, confidence: float = 0):
+        assert len(points) == 4
+        super().__init__(points, category, confidence)
 
     def area(self) -> float:
         return self.bbox[2] * self.bbox[3]

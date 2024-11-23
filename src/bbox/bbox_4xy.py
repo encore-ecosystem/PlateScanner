@@ -3,7 +3,7 @@ from shapely.geometry import Polygon
 
 
 class Bbox_4XY(Bbox):
-    def __init__(self, points: tuple[float, ...], category: int = -1, confidence: float = 0) -> None:
+    def __init__(self, points: list[float], category: int = -1, confidence: float = 0) -> None:
         assert len(points) == 8
         super().__init__(points, category, confidence)
 

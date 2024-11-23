@@ -1,5 +1,7 @@
 from matplotlib.patches import Polygon
 
+from src import DEFAULT_CONFIDENCE_LEVEL, BBOX_EDGE_COLOR, BBOX_TEXT_COLOR, BBOX_TEXT_FONTSIZE, \
+    BBOX_TEXT_HORIZONTAL_SHIFT, BBOX_TEXT_VERTICAL_SHIFT
 from src.model import Yolo, YoloOBB
 from src.utils import get_model_cli
 
@@ -9,6 +11,8 @@ from PIL import Image
 
 import matplotlib.pyplot as plt
 import os
+
+from src.utils.draw_bbox import draw_bbox
 
 
 def view():
@@ -34,14 +38,12 @@ def view():
             break
 
         while True:
-            print('Choose a confidence level in percent.')
-            confidence_level = input('[default=6] >> ')
+            confidence_level = input('Enter a confidence level in percent [default=6]: ')
             if not (len(confidence_level) == 0 or confidence_level.isdigit()):
                 print("Invalid confidence level percent.")
                 continue
-            confidence_level = 0.06 if len(confidence_level) == 0 else int(confidence_level) / 100
+            confidence_level = DEFAULT_CONFIDENCE_LEVEL if len(confidence_level) == 0 else int(confidence_level) / 100
             break
-
 
         # Computation
         model_path = get_model_cli()
@@ -66,12 +68,19 @@ def view():
             fig.patch.set_visible(False)
 
             for idx, bbox in enumerate(bboxes[img_stem]):
-                polygone = [[int(point[0] * width), int(point[1] * height)] for point in bbox.get_poly()]
-                axs.add_patch(Polygon(polygone, fill=False, edgecolor='red'))
-                point = polygone[0]
-                axs.text(point[0] - 125, point[1] - 20, s=f"{bbox.confidence:.2f}", color='red', fontsize=4)
+                draw_bbox(
+                    axs  = axs,
+                    bbox = bbox.to_image_scale(width, height),
+                    text = f"{bbox.confidence:.2f}",
+                )
+
             plt.savefig(output_path / f"{img_stem}.png", dpi=300)
             plt.close(fig)
 
     except KeyboardInterrupt:
         print('Returning back.')
+
+
+__all__ = [
+    'view'
+]

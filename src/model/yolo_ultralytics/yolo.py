@@ -33,13 +33,16 @@ class Yolo(YoloBase):
                 )
                 bboxes.append(bbox)
 
-        bboxes  = nms(
-                bbox_to_total_area_filter(
-                    bboxes           = tuple(bboxes),
-                    area_threshold   = kwargs.get('area_threshold', 0.01),
-                ),
-            iou_threshold=0
+        # area filter
+        bboxes = bbox_to_total_area_filter(
+            bboxes=bboxes,
+            area_threshold=kwargs.get('area_threshold', 0.01),
         )
+
+        # nms filter
+        bboxes = nms(bboxes, iou_threshold=0)
+
+        # result
         return {source.stem: bboxes}
 
 

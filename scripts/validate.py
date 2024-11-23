@@ -20,17 +20,17 @@ def get_target_bboxes(dataset_path: Path) -> dict[str, list[Bbox]]:
             for bbox_data in f.readlines():
                 bbox_data = bbox_data.split()
                 category = int(bbox_data.pop(0))
-                points = tuple(map(float, bbox_data))
+                points = list(map(float, bbox_data))
                 match len(points):
                     # non-obb bbox
                     case 4:
                         bboxes[label_name] = bboxes.get(label_name, []) + [
-                            Bbox_CWH(*points, category=category)
+                            Bbox_CWH(points=points, category=category)
                         ]
                     # point-based obb bbox
                     case 8:
                         bboxes[label_name] = bboxes.get(label_name, []) + [
-                            Bbox_4XY(points, category=category)
+                            Bbox_4XY(points=points, category=category)
                         ]
     return bboxes
 
