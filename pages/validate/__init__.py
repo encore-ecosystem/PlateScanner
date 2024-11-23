@@ -80,7 +80,7 @@ def view():
                 selected_category=0
             )
             plot_conf_matrix(TP, FP, FN, output_path, criteria.__repr__())
-            print(f"Confusion matrix with criteria {criteria} saved.")
+            print(f"Confusion matrix with criteria <{criteria}> saved.")
 
             #
             # Choose sample images
@@ -89,13 +89,13 @@ def view():
                 num = input("Enter num of image samples to save [default=all]: ")
                 if len(num) == 0:
                     num = len(original_bboxes)
-                elif num.isdigit():
-                    num = int(num)
+                elif num.isdigit() and int(num) > 0:
+                    num = min(int(num), len(original_bboxes))
                 else:
                     print("Invalid input")
                     continue
                 break
-            images_samples = random.choices(list(original_bboxes.keys()), k=num)
+            images_samples = list(original_bboxes.keys())[:num]
 
             #
             # Save sample images
@@ -124,7 +124,7 @@ def view():
                     draw_bbox(
                         axs          = axs,
                         bbox         = bbox.to_image_scale(width, height),
-                        text         = criteria.__repr__(),
+                        text         = f"{criteria.__repr__()} {bbox.confidence:.2f}",
                         text_h_shift = -125,
                         text_v_shift = -20,
                         text_color   = 'green',

@@ -38,7 +38,7 @@ def view():
             break
 
         while True:
-            confidence_level = input('Enter a confidence level in percent [default=6]: ')
+            confidence_level = input(f'Enter a confidence level in percent [default={int(DEFAULT_CONFIDENCE_LEVEL * 100)}]: ')
             if not (len(confidence_level) == 0 or confidence_level.isdigit()):
                 print("Invalid confidence level percent.")
                 continue

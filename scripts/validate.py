@@ -1,13 +1,16 @@
+from src import DEFAULT_CONFIDENCE_LEVEL
 from src.model import YoloBase
 from pathlib import Path
 from src.bbox import *
 from tqdm import tqdm
 
 
-def get_predicted_bboxes(dataset_path: Path, model: YoloBase) -> dict[str, list[Bbox]]:
+def get_predicted_bboxes(dataset_path: Path, model: YoloBase, conf: float = DEFAULT_CONFIDENCE_LEVEL, use_pbar: bool = True) -> dict[str, list[Bbox]]:
     bboxes = {}
-    for image_path in tqdm(list((dataset_path / "valid" / "images").glob("*")), desc='Processing predicted bboxes'):
-        predicted_bboxes = model.predict(source=image_path, conf=0.1)
+    pbar = list((dataset_path / "valid" / "images").glob("*"))
+    pbar = tqdm(pbar, total=len(pbar), desc='Processing predicted bboxes') if use_pbar else pbar
+    for image_path in pbar:
+        predicted_bboxes = model.predict(source=image_path, conf=conf)
         bboxes.update(predicted_bboxes)
     return bboxes
 
