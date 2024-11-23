@@ -5,9 +5,9 @@ import albumentations
 
 def main():
     Yolo(
-        weights_path=Path(__file__).parent.parent / 'model' / 'yolo11n.pt'
+        weights_path=Path(__file__).parent.parent / 'models' / 'yolo11n-obb.pt'
     ).fit(
-        dataset_path=Path(__file__).parent.parent / 'dataset' / 'detection' / 'dataset3',
+        dataset_path=Path(__file__).parent.parent / 'dataset' / 'detection' / 'dataset_obb',
         augmentation=albumentations.Compose([
             albumentations.RandomRain(p=0.5, brightness_coefficient=1),
             # to do: Не работает тренировка на Morphological, исправить

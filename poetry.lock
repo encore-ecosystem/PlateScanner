@@ -844,13 +844,13 @@ test = ["pytest (>=7.2)", "pytest-cov (>=4.0)"]
 
 [[package]]
 name = "nodeflow"
-version = "0.0.4"
+version = "0.1.0"
 description = ""
 optional = false
 python-versions = "<4.0,>=3.10"
 files = [
-    {file = "nodeflow-0.0.4-py3-none-any.whl", hash = "sha256:170117a1df854c9942f89004de718bc3d35a7c80324f6b6552671451f42c58d9"},
-    {file = "nodeflow-0.0.4.tar.gz", hash = "sha256:f31ec20908e60acc8c758a2609ed6c3c8410c467ae4ba285efff0736403f668f"},
+    {file = "nodeflow-0.1.0-py3-none-any.whl", hash = "sha256:05b4a4182e6996e0f00e2858cf1efcf520e942b4d0a6c9bd909a7de28f3453b9"},
+    {file = "nodeflow-0.1.0.tar.gz", hash = "sha256:f70389a1f4071c2dab91eae94b3e28a41688526966ed6a35beaff064feaba100"},
 ]
 
 [[package]]
@@ -2485,4 +2485,4 @@ zstd = ["zstandard (>=0.18.0)"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.12,<3.13"
-content-hash = "31f979e9c963e059e80a21a0e3525e31822b2c515da104dd41bfdea9af1b7653"
+content-hash = "f0fb0e5eb8d3a95b9a440907375883b22a6b51259046703cedb36423bd9041d2"
