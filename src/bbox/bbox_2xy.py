@@ -3,7 +3,7 @@ from shapely.geometry import box
 
 
 class Bbox_2xy(Bbox):
-    def __init__(self, points: tuple[float, ...], category: int = -1, confidence: float = 0):
+    def __init__(self, points: list[float], category: int = -1, confidence: float = 0):
         assert len(points) == 4
         super().__init__(points, category, confidence)
 

@@ -6,6 +6,8 @@ from src.utils import get_model_cli, plot_conf_matrix
 from matplotlib import pyplot as plt
 from pathlib import Path
 from tqdm import tqdm
+
+from src.utils.draw_bbox import draw_bbox
 from src.validator.criteria import CustomCriteria, Distance, Time
 from src.validator.stat import Validator
 import random
@@ -99,26 +101,35 @@ def view():
             # Save sample images
             #
             for image_stem in tqdm(images_samples, desc="Saving validation images"):
-                image_for_debug = (input_path / 'valid' / 'images').glob(f'{image_stem}.*').__next__()
-                fig, axs = plt.subplots()
-
-                image = Image.open(image_for_debug)
+                image = Image.open((input_path / 'valid' / 'images').glob(f'{image_stem}.*').__next__())
                 width, height = image.size
+
+                fig, axs = plt.subplots()
                 axs.imshow(image, cmap='gray')
                 axs.axis('off')
                 fig.patch.set_visible(False)
 
-                for source, color in [(filtered_original_bboxes.get(image_stem, []), 'red'),
-                                      (filtered_predicted_bboxes.get(image_stem, []), 'green')]:
-                    for idx, (bbox, criteria) in enumerate(source):
-                        polygone = [[int(point[0] * width), int(point[1] * height)] for point in bbox.get_poly()]
-                        axs.add_patch(Polygon(polygone, fill=False, edgecolor=color))
-                        point = polygone[0]
+                for bbox, criteria in filtered_original_bboxes.get(image_stem, []):
+                    draw_bbox(
+                        axs          = axs,
+                        bbox         = bbox.to_image_scale(width, height),
+                        text         = criteria.__repr__(),
+                        text_h_shift = -200,
+                        text_v_shift = 75,
+                        text_color   = 'red',
+                        edge_color   = 'red',
+                    )
 
-                        if color == 'green':
-                            axs.text(point[0] - 200, point[1] + 75, s=criteria.__repr__(), color=color, fontsize=4)
-                        elif color == 'red':
-                            axs.text(point[0] - 125, point[1] - 20, s=criteria.__repr__(), color=color, fontsize=4)
+                for bbox, criteria in filtered_predicted_bboxes.get(image_stem, []):
+                    draw_bbox(
+                        axs          = axs,
+                        bbox         = bbox.to_image_scale(width, height),
+                        text         = criteria.__repr__(),
+                        text_h_shift = -125,
+                        text_v_shift = -20,
+                        text_color   = 'green',
+                        edge_color   = 'green',
+                    )
 
                 plt.savefig(output_path / f"{image_stem}.png", dpi=300)
                 plt.close(fig)
@@ -126,3 +137,8 @@ def view():
 
     except KeyboardInterrupt:
         print('Returning back.')
+
+
+__all__ = [
+    'view'
+]
