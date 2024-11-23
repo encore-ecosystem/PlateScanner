@@ -3,8 +3,5 @@ from pathlib import Path
 # ================
 # Constants
 # ================
-DATA_PATH   = Path().resolve() / 'dataset' / 'detection'
-
-__all__ = [
-    'DATA_PATH',
-]
+PROJECT_ROOT_PATH = Path(__file__).parent.parent.resolve()
+MODEL_PATH_FOLDER = PROJECT_ROOT_PATH / "models"

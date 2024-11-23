@@ -1,18 +1,15 @@
+from matplotlib.patches import Polygon
+
 from src.model import Yolo, YoloOBB
+from src.utils import get_model_cli
 
 from pathlib import Path
 from tqdm import tqdm
+from PIL import Image
 
-import numpy as np
-import cv2
+import matplotlib.pyplot as plt
 import os
 
-models = {
-    'yolo11n-obb'     : True,
-    'yolo11x'         : False,
-    'yolo11x-overfit' : False,
-    'yolov5nu'        : False,
-}
 
 def view():
     try:
@@ -37,16 +34,6 @@ def view():
             break
 
         while True:
-            print('Please, choose a model:')
-            for model in models:
-                print(f"\t{model}")
-            model = input('[yolov5nu] >> ')
-            model = 'yolov5nu' if len(model) == 0 else model
-            if not model in models:
-                print('Invalid model name')
-                continue
-            break
-        while True:
             print('Choose a confidence level in percent.')
             confidence_level = input('[default=6] >> ')
             if not (len(confidence_level) == 0 or confidence_level.isdigit()):
@@ -55,34 +42,36 @@ def view():
             confidence_level = 0.06 if len(confidence_level) == 0 else int(confidence_level) / 100
             break
 
-        # Validate and prepare args
-        root = Path(__file__).parent.parent.parent.resolve()
 
         # Computation
-        model = (YoloOBB if models[model] else Yolo)(root / 'model' / f"{model}.pt")
+        model_path = get_model_cli()
+        model = (YoloOBB if 'obb' in model_path.stem else Yolo)(model_path)
 
-        for img_path in tqdm(os.listdir(input_path), desc='Prediction'):
-            bboxes = model.predict(
-                source=(input_path / img_path).__str__(),
+        bboxes = {}
+        for img_path in tqdm(os.listdir(input_path / 'valid' / 'images'), desc="Prediction"):
+            curr_bboxes = model.predict(
+                source=(input_path / 'valid' / 'images' / img_path).__str__(),
                 conf=confidence_level,
                 line_width=None,
             )
-            image = cv2.imread(str(input_path / img_path))
-            width, height = image.shape[:2]
-            for bbox in bboxes[Path(img_path).stem]:
-                polygone = [[int(point[0] * width), int(point[1] * height)] for point in bbox.get_poly()]
-                pts = np.array(polygone, np.int32)
-                pts = pts.reshape((-1, 1, 2))
-                cv2.polylines(image, [pts], isClosed=False, color=(205, 0, 255), thickness=3)
-                first_point = polygone[0]
-                cv2.putText(
-                    image,
-                    # parse class id from yaml
-                    f"Plate: {bbox.confidence:.2f}",
-                    (int(first_point[0] - 15), int(first_point[1] - 10)),
-                    cv2.FONT_HERSHEY_SIMPLEX, 1, color=(205, 0, 255), thickness=3, lineType=cv2.LINE_AA)
+            bboxes.update(curr_bboxes)
 
-            cv2.imwrite((output_path / img_path).__str__(), image)
+        for img_stem in tqdm(bboxes, desc="Drawing bboxes on images"):
+            image = Image.open((input_path / 'valid' / 'images').glob(f'{img_stem}.*').__next__())
+            width, height = image.size
+
+            fig, axs = plt.subplots()
+            axs.imshow(image, cmap='gray')
+            axs.axis('off')
+            fig.patch.set_visible(False)
+
+            for idx, bbox in enumerate(bboxes[img_stem]):
+                polygone = [[int(point[0] * width), int(point[1] * height)] for point in bbox.get_poly()]
+                axs.add_patch(Polygon(polygone, fill=False, edgecolor='red'))
+                point = polygone[0]
+                axs.text(point[0] - 125, point[1] - 20, s=f"{bbox.confidence:.2f}", color='red', fontsize=4)
+            plt.savefig(output_path / f"{img_stem}.png", dpi=300)
+            plt.close(fig)
 
     except KeyboardInterrupt:
         print('Returning back.')

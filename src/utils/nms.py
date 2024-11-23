@@ -1,8 +1,8 @@
 from src.utils.iou import bbox_iou
-from src.bbox.bbox_abs import Bbox
+from src.bbox.abstract import Bbox
 
 
-def nms(bboxes: tuple[Bbox, ...], iou_threshold: float) -> tuple[Bbox, ...]:
+def nms(bboxes: list[Bbox], iou_threshold: float) -> list[Bbox]:
     result_bboxes = set(bboxes)
     for bbox_A in bboxes:
         to_delete = set()
@@ -13,7 +13,7 @@ def nms(bboxes: tuple[Bbox, ...], iou_threshold: float) -> tuple[Bbox, ...]:
                 else:
                     to_delete.add(bbox_B)
         result_bboxes -= to_delete
-    return tuple(result_bboxes)
+    return list(result_bboxes)
 
 
 __all__ = [

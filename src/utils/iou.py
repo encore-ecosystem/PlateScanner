@@ -1,4 +1,4 @@
-from src.bbox.bbox_abs import Bbox
+from src.bbox.abstract import Bbox
 
 
 def bbox_iou(bbox_A: Bbox, bbox_B: Bbox) -> float:
