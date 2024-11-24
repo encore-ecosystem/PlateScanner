@@ -92,12 +92,12 @@ class Time(Enum):
 
 Посмотрим на результаты работы алгоритма на основании следующего изображения:
 
-![plate_scanner](.\Assets\third.jpg)
+![plate_scanner](Assets/third.jpg)
 
 Получили следующий результат:
 
-![plate_scanner](.\Assets\third_out_cropped.png)
+![plate_scanner](Assets/third_out_cropped.png)
 
 Confusion Matrix выглядит следующим образом: 
 
-![plate_scanner](.\Assets\0_ConfusionMatrix.png)
+![plate_scanner](Assets/0_ConfusionMatrix.png)
