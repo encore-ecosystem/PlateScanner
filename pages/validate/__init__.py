@@ -114,8 +114,8 @@ def view():
                         axs          = axs,
                         bbox         = bbox.to_image_scale(width, height),
                         text         = criteria.__repr__(),
-                        text_h_shift = -200,
-                        text_v_shift = 75,
+                        text_h_shift = int(-0.05 * width),
+                        text_v_shift = int(0.05 * height),
                         text_color   = 'red',
                         edge_color   = 'red',
                     )
@@ -125,8 +125,8 @@ def view():
                         axs          = axs,
                         bbox         = bbox.to_image_scale(width, height),
                         text         = f"{criteria.__repr__()} {bbox.confidence:.2f}",
-                        text_h_shift = -125,
-                        text_v_shift = -20,
+                        text_h_shift = int(-0.08 * width),
+                        text_v_shift = int(-0.01 * height),
                         text_color   = 'green',
                         edge_color   = 'green',
                     )
