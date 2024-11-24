@@ -7,17 +7,16 @@ def main():
     Yolo(
         weights_path=Path(__file__).parent.parent / 'models' / 'yolo11n-obb.pt'
     ).fit(
-        dataset_path=Path(__file__).parent.parent / 'dataset' / 'detection' / 'dataset_obb',
+        dataset_path=Path(__file__).parent.parent / 'dataset' / 'dataset3_obb',
         augmentation=albumentations.Compose([
+            albumentations.RandomBrightnessContrast(p=0.5,brightness_limit=(-0.4, 0.4), contrast_limit=(-0.4, 0.4)),
             albumentations.RandomRain(p=0.5, brightness_coefficient=1),
-            # to do: Не работает тренировка на Morphological, исправить
-            #albumentations.Morphological(p=0.4, scale=(2, 3), operation="erosion"),
-            albumentations.RandomBrightnessContrast(p=0.5),
-
+            albumentations.RandomSnow(p=0.5),
+            albumentations.ISONoise(p=0.5),
             albumentations.CLAHE(always_apply=True),
             albumentations.ToGray(always_apply=True),
         ],
-        bbox_params=albumentations.BboxParams(format="yolo")),
+        bbox_params=albumentations.BboxParams(format="yolo"), strict=False),
         # todo: fix False usage <on arch linux>
         use_clearml=True,
     )

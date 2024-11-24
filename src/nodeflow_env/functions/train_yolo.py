@@ -21,7 +21,7 @@ def __train_yolo_with_clearml(model_path: MyPath, config: dict):
     model_variant = model_path.value.stem
     task = Task.init(
         project_name = "PlateScanner",
-        task_name    = f"Training YoLo <{model_variant}> on dataset (3)"
+        task_name    = f"Fine-tuning YOLO <{model_variant}> on dataset (3) with obb"
     )
     task.set_parameter(name="model_variant", value=model_variant)
     model = YOLO(model_path.value.__str__())

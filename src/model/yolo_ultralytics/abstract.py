@@ -33,7 +33,7 @@ class YoloBase(Model, metaclass=ABCMeta):
             model_path   = MyPath(self.weights_path),
             dataset_path = PathVariable(dataset_path),
             imgsz        = Integer(1280),
-            epochs       = Integer(50),
+            epochs       = Integer(30),
             use_clearml  = Boolean(use_clearml),
         ) >> func2node(train_yolo)
 

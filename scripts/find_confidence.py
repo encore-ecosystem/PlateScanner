@@ -12,7 +12,7 @@ TARGET_PRECISION = 0.95
 def main():
     model_path = get_model_cli()
     model = (YoloOBB if 'obb' in model_path.stem else Yolo)(model_path)
-    input_path = PROJECT_ROOT_PATH / "dataset" / "detection" / f"target_pictures_{"obb" if 'obb' in model_path.stem else "bb"}"
+    input_path = PROJECT_ROOT_PATH / "dataset" / f"target_pictures_{"obb" if 'obb' in model_path.stem else "bb"}"
 
     original_bboxes  = get_target_bboxes(input_path)
     v = Validator()

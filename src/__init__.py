@@ -3,7 +3,7 @@ from pathlib import Path
 # ================
 # Hyperparameters
 # ================
-DEFAULT_CONFIDENCE_LEVEL   = 0.02
+DEFAULT_CONFIDENCE_LEVEL   = 0.06
 BBOX_EDGE_COLOR            = 'red'
 BBOX_TEXT_COLOR            = 'red'
 BBOX_TEXT_FONTSIZE         = 4

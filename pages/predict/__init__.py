@@ -42,7 +42,7 @@ def view():
             if not (len(confidence_level) == 0 or confidence_level.isdigit()):
                 print("Invalid confidence level percent.")
                 continue
-            confidence_level = DEFAULT_CONFIDENCE_LEVEL if len(confidence_level) == 0 else int(confidence_level) / 100
+            confidence_level = DEFAULT_CONFIDENCE_LEVEL if len(confidence_level) == 0 else (int(confidence_level) / 100)
             break
 
         # Computation

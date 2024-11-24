@@ -2,9 +2,6 @@ from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
-from mlflow.metrics import f1_score
-from scipy.constants import precision
-
 
 def plot_conf_matrix(tp: int, fp: int, fn: int, output_path: Path, title: str, image_name: str = "0_ConfusionMatrix.png"):
     conf_matrix = np.array([[tp, fn], [fp, 0]])
