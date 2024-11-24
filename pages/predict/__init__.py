@@ -50,16 +50,16 @@ def view():
         model = (YoloOBB if 'obb' in model_path.stem else Yolo)(model_path)
 
         bboxes = {}
-        for img_path in tqdm(os.listdir(input_path / 'valid' / 'images'), desc="Prediction"):
+        for img_path in tqdm(os.listdir(input_path / 'test' / 'images'), desc="Prediction"):
             curr_bboxes = model.predict(
-                source=(input_path / 'valid' / 'images' / img_path).__str__(),
+                source=(input_path / 'test' / 'images' / img_path).__str__(),
                 conf=confidence_level,
                 line_width=None,
             )
             bboxes.update(curr_bboxes)
 
         for img_stem in tqdm(bboxes, desc="Drawing bboxes on images"):
-            image = Image.open((input_path / 'valid' / 'images').glob(f'{img_stem}.*').__next__())
+            image = Image.open((input_path / 'test' / 'images').glob(f'{img_stem}.*').__next__())
             width, height = image.size
 
             fig, axs = plt.subplots()
@@ -72,6 +72,7 @@ def view():
                     axs  = axs,
                     bbox = bbox.to_image_scale(width, height),
                     text = f"{bbox.confidence:.2f}",
+                    # text_h_shift = int(0 * width)
                 )
 
             plt.savefig(output_path / f"{img_stem}.png", dpi=300)
