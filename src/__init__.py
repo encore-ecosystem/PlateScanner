@@ -1,26 +1,17 @@
 from pathlib import Path
 
 # ================
+# Hyperparameters
+# ================
+DEFAULT_CONFIDENCE_LEVEL   = 0.06
+BBOX_EDGE_COLOR            = 'red'
+BBOX_TEXT_COLOR            = 'red'
+BBOX_TEXT_FONTSIZE         = 4
+BBOX_TEXT_HORIZONTAL_SHIFT = -125
+BBOX_TEXT_VERTICAL_SHIFT   = -20
+
+# ================
 # Constants
 # ================
-DATA_PATH   = Path().resolve() / 'dataset' / 'detection'
-
-
-from ultralytics.data.augment import Albumentations
-
-import albumentations as A
-def __init__(self, p=1.0):
-        self.p = p
-        self.transform = None
-        # Insert required transformation here
-        T = [
-            A.ToGray(p=1),
-            A.CLAHE(p=1),
-        ]
-        self.transform = A.Compose(T)
-
-Albumentations.__init__ = __init__
-
-__all__ = [
-    'DATA_PATH',
-]
+PROJECT_ROOT_PATH = Path(__file__).parent.parent.resolve()
+MODEL_PATH_FOLDER = PROJECT_ROOT_PATH / "models"

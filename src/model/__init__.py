@@ -1,1 +1,2 @@
-from .yolov5 import *
+from .yolo_ultralytics import *
+# from .models import Model
