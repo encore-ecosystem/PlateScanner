@@ -1,6 +1,7 @@
 from PIL import Image
 from matplotlib.patches import Polygon
 from scripts.validate import get_target_bboxes, get_predicted_bboxes
+from src import DEFAULT_CONFIDENCE_LEVEL
 from src.model import Yolo, YoloOBB
 from src.utils import get_model_cli, plot_conf_matrix
 from matplotlib import pyplot as plt
@@ -37,11 +38,19 @@ def view():
                 continue
             break
 
+        while True:
+            confidence_level = input(f'Enter a confidence level in percent [default={int(DEFAULT_CONFIDENCE_LEVEL * 100)}]: ')
+            if not (len(confidence_level) == 0 or confidence_level.isdigit()):
+                print("Invalid confidence level percent.")
+                continue
+            confidence_level = DEFAULT_CONFIDENCE_LEVEL if len(confidence_level) == 0 else (int(confidence_level) / 100)
+            break
+
         model_path = get_model_cli()
         model = (YoloOBB if 'obb' in model_path.stem else Yolo)(model_path)
 
         original_bboxes  = get_target_bboxes(input_path)
-        predicted_bboxes = get_predicted_bboxes(input_path, model)
+        predicted_bboxes = get_predicted_bboxes(input_path, model, confidence_level)
         v = Validator()
         v.fit_brightness(CALIBRATION_DATASET)
         v.fit_distance(input_path, original_bboxes)

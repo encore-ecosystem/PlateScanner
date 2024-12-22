@@ -5,7 +5,7 @@ from src.bbox import *
 from tqdm import tqdm
 
 
-def get_predicted_bboxes(dataset_path: Path, model: YoloBase, conf: float = DEFAULT_CONFIDENCE_LEVEL, use_pbar: bool = True) -> dict[str, list[Bbox]]:
+def get_predicted_bboxes(dataset_path: Path, model: YoloBase, conf: float, use_pbar: bool = True) -> dict[str, list[Bbox]]:
     bboxes = {}
     pbar = list((dataset_path / "valid" / "images").glob("*"))
     pbar = tqdm(pbar, total=len(pbar), desc='Processing predicted bboxes') if use_pbar else pbar

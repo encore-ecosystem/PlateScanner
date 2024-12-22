@@ -1,3 +1,4 @@
+from src import PROJECT_ROOT_PATH
 from src.model import Yolo
 from pathlib import Path
 import albumentations
@@ -5,9 +6,9 @@ import albumentations
 
 def main():
     Yolo(
-        weights_path=Path(__file__).parent.parent / 'models' / 'yolo11n-obb.pt'
+        weights_path= PROJECT_ROOT_PATH / 'models' / 'yolov11v2-obb.pt'
     ).fit(
-        dataset_path=Path(__file__).parent.parent / 'dataset' / 'dataset3_obb',
+        dataset_path= PROJECT_ROOT_PATH  / 'dataset' / 'target_pictures_OBB',
         augmentation=albumentations.Compose([
             albumentations.RandomBrightnessContrast(p=0.5,brightness_limit=(-0.4, 0.4), contrast_limit=(-0.4, 0.4)),
             albumentations.RandomRain(p=0.5, brightness_coefficient=1),
@@ -18,7 +19,7 @@ def main():
         ],
         bbox_params=albumentations.BboxParams(format="yolo"), strict=False),
         # todo: fix False usage <on arch linux>
-        use_clearml=True,
+        use_clearml=False,
     )
 
 
