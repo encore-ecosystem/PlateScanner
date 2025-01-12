@@ -1,4 +1,3 @@
-from src import DEFAULT_CONFIDENCE_LEVEL
 from src.model import YoloBase
 from pathlib import Path
 from src.bbox import *
@@ -38,3 +37,7 @@ def get_target_bboxes(dataset_path: Path) -> dict[str, list[Bbox]]:
     return bboxes
 
 
+__all__ = [
+    'get_predicted_bboxes',
+    'get_target_bboxes',
+]
