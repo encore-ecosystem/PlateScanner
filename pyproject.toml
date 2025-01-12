@@ -1,31 +1,28 @@
 [tool.poetry]
 name = "platescanner"
-version = "0.1.0"
+version = "0.3.0"
 description = ""
 authors = [
     "Maksim Shushkevich <m.e.shushkevich@yandex.com>",
     "Pavel Lekomtsev <example@of.com>",
-
+    "Vladislav Tyurin <example@of.com>"
 ]
 readme = "README.md"
 
 [tool.poetry.dependencies]
 python = ">=3.12,<3.13"
-torch = {version = "^2.5.1+cu124", source = "pytorch-gpu"}
-torchvision = {version = "^0.20.1+cu124", source = "pytorch-gpu"}
-ultralytics = "^8.3.3"
+ultralytics = ">=8.3.30"
 clearml = "^1.16.4"
-albumentations = "^1.4.17"
+albumentations = "^2.0.0"
 nodeflow = "^0.1.0"
 pycocotools = "^2.0.8"
 shapely = "^2.0.6"
-
-
-[[tool.poetry.source]]
-name = "pytorch-gpu"
-url = "https://download.pytorch.org/whl/cu124"
-priority = "explicit"
+torch = "^2.5.1"
+torchvision = "^0.20.1"
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+platescanner = "platescanner.main:main"
