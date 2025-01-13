@@ -1,14 +1,14 @@
 from nodeflow.builtin import PathVariable, Integer, Boolean
 from nodeflow import Dispenser, func2node
 
-from src.nodeflow_env import train_yolo, load_augmentations, Compose, validate_yolo
-from src.model.model import Model
+from platescanner.nodeflow_env import train_yolo, load_augmentations, Compose, validate_yolo
+from platescanner.model.model import Model
 from pathlib import Path
 from abc import ABCMeta
 
 import albumentations
 
-from src.nodeflow_env.variables import MyPath
+from platescanner.nodeflow_env.variables import MyPath
 
 
 class YoloBase(Model, metaclass=ABCMeta):

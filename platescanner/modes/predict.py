@@ -54,6 +54,7 @@ def mode(args):
         print("Please, specify the weights path")
         exit(-1)
 
+    # run
     input_path = config['-dataset-path']
     output_path = config['-output-path']
     confidence_level = config['-confidence_level']

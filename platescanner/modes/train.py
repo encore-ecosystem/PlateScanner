@@ -1,5 +1,5 @@
-from src.utils import handle_path
-from src.model import Yolo
+from platescanner.utils import handle_path
+from platescanner.model import Yolo
 
 import albumentations
 
@@ -16,20 +16,10 @@ def mode(args):
     while current < len(args):
         match args[current]:
             case '-weights_path':
-                path = handle_path(args[current + 1])
-                if not path.exists():
-                    print(f"Weights path does not exist: {path}")
-                    exit(-1)
-
-                config['-weights_path'] = args[current + 1]
+                config['-weights_path'] = handle_path(args[current + 1])
                 current += 1
             case '-dataset_path':
-                path = handle_path(args[current + 1])
-                if not path.exists():
-                    print(f"Dataset path does not exist: {path}")
-                    exit(-1)
-
-                config['-dataset_path'] = args[current + 1]
+                config['-dataset_path'] = handle_path(args[current + 1])
                 current += 1
             case '-use-clearml':
                 config['-use-clearml'] = True
@@ -40,10 +30,10 @@ def mode(args):
 
     # validate args
     if config['-weights_path'] is None:
-        print("Please, specify weights path")
+        print("Please, specify -weights_path")
         exit(-1)
     if config['-dataset_path'] is None:
-        print("Please, specify dataset path")
+        print("Please, specify -dataset_path")
         exit(-1)
 
     # run

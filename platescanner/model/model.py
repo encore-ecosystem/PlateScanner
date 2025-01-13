@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from src.bbox.abstract import Bbox
+from platescanner.bbox.abstract import Bbox
 
 
 class Model(ABC):

@@ -1,6 +1,3 @@
 .idea
-runs
-dataset
-yolo11n.pt
-output
-__pycache__
+/datasets
+/calibration

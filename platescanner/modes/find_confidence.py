@@ -1,19 +1,20 @@
-from src.modes.validate import get_target_bboxes, get_predicted_bboxes
-from src.model import YoloOBB, Yolo
-from src.utils import handle_path
-from src.validator.criteria import CustomCriteria
-from src.validator.stat import Validator
-from src import PROJECT_ROOT_PATH
+import pickle
+
+from platescanner.utils.validate_funcs import get_target_bboxes, get_predicted_bboxes
+from platescanner.model import YoloOBB, Yolo
+from platescanner.utils import handle_path
+from platescanner.validator.criteria import CustomCriteria
+from platescanner.validator.stat import Validator
+from platescanner import PROJECT_ROOT_PATH
 from tqdm import tqdm
 
-CALIBRATION_DATASET = PROJECT_ROOT_PATH / 'calibration'
-TARGET_PRECISION = 0.95
 
 def mode(args):
     config = {
-        '-weights_path': None,
-        '-dataset_path': None,
-        '-iters'       : 7,
+        '-weights_path'     : None,
+        '-dataset_path'     : None,
+        '-iters'            : 7,
+        '-target_precision' : 0.95,
     }
 
     # parse args
@@ -27,7 +28,7 @@ def mode(args):
                     print(f"Weights path does not exist: {path}")
                     exit(-1)
 
-                config['-weights_path'] = args[current + 1]
+                config['-weights_path'] = path
                 current += 1
             case '-dataset_path':
                 path = handle_path(args[current + 1])
@@ -35,7 +36,7 @@ def mode(args):
                     print(f"Dataset path does not exist: {path}")
                     exit(-1)
 
-                config['-dataset_path'] = args[current + 1]
+                config['-dataset_path'] = path
                 current += 1
             case '-iters':
                 iters = args[current + 1]
@@ -44,6 +45,14 @@ def mode(args):
                     exit(-1)
 
                 config['-iters'] = int(iters)
+                current += 1
+            case '-target_precision':
+                target_precision = args[current + 1]
+                if not target_precision.replace('.', '', 1).isdigit() or float(target_precision) < 0 or float(target_precision) > 1:
+                    print(f"Invalid target precision: {target_precision}")
+                    exit(-1)
+
+                config['-target_precision'] = float(target_precision)
                 current += 1
             case _:
                 print(f"Unknown argument: {args[current]}")
@@ -59,15 +68,15 @@ def mode(args):
         exit(-1)
 
     # run
-    model_path = handle_path(config['-weights_path'])
+    model_path = config['-weights_path']
     model      = (YoloOBB if 'obb' in model_path.stem else Yolo)(model_path)
     input_path = config['-dataset_path']
 
     original_bboxes  = get_target_bboxes(input_path)
-    v = Validator()
-    v.fit_brightness(CALIBRATION_DATASET)
-    v.fit_distance(input_path, original_bboxes)
 
+    with open(PROJECT_ROOT_PATH / 'pretrained_validator.pickle', 'rb') as f:
+        v : Validator = pickle.load(f)
+    v.fit_distance(input_path, original_bboxes)
     classified_original_bboxes = v.predict(input_path, original_bboxes)
 
     criteria = CustomCriteria()
@@ -88,9 +97,9 @@ def mode(args):
         )
         precision = TP / (TP + FP)
         pbar.set_description(f"Precision = {precision:.2f} confidence = {mid:.2f}")
-        if precision < TARGET_PRECISION:
+        if precision < config['-target_precision']:
             lower = mid
-        elif precision > TARGET_PRECISION:
+        elif precision > config['-target_precision']:
             upper = mid
         else:
             break

@@ -1,6 +1,6 @@
 from .abstract import Bbox
 from shapely.geometry import Polygon, box
-from src.bbox.bbox_2xy import Bbox_2xy
+from platescanner.bbox.bbox_2xy import Bbox_2xy
 
 
 class Bbox_CWH(Bbox):

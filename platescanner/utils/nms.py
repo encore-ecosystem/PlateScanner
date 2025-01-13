@@ -1,5 +1,5 @@
-from src.utils.iou import bbox_iou
-from src.bbox.abstract import Bbox
+from platescanner.utils.iou import bbox_iou
+from platescanner.bbox.abstract import Bbox
 
 
 def nms(bboxes: list[Bbox], iou_threshold: float) -> list[Bbox]:

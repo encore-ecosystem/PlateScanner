@@ -1,6 +1,6 @@
-from src.model import YoloBase
+from platescanner.model import YoloBase
 from pathlib import Path
-from src.bbox import *
+from platescanner.bbox import *
 from tqdm import tqdm
 
 

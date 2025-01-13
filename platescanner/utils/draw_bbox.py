@@ -1,6 +1,6 @@
 from matplotlib.patches import Polygon
-from src import BBOX_EDGE_COLOR, BBOX_TEXT_HORIZONTAL_SHIFT, BBOX_TEXT_VERTICAL_SHIFT, BBOX_TEXT_COLOR, BBOX_TEXT_FONTSIZE
-from src.bbox import Bbox
+from platescanner import BBOX_EDGE_COLOR, BBOX_TEXT_HORIZONTAL_SHIFT, BBOX_TEXT_VERTICAL_SHIFT, BBOX_TEXT_COLOR, BBOX_TEXT_FONTSIZE
+from platescanner.bbox import Bbox
 import matplotlib.pyplot as plt
 
 
