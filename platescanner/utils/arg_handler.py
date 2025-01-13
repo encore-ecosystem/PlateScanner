@@ -1,3 +1,5 @@
+import os
+
 from platescanner import PROJECT_ROOT_PATH
 from pathlib import Path
 
@@ -5,7 +7,7 @@ from pathlib import Path
 def handle_path(path: str, should_exist: bool = True) -> Path:
     path = Path(path)
     if not path.is_absolute():
-        path = (PROJECT_ROOT_PATH / path).resolve()
+        path = (Path(os.getcwd()) / path).resolve()
 
     if not (should_exist and path.exists()):
         print(f"Output path does not exist: {path}")

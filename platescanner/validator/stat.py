@@ -1,13 +1,11 @@
-from bdb import Breakpoint
-
-import cv2
-import numpy as np
+from platescanner.bbox.abstract import Bbox
+from platescanner.validator.criteria import CustomCriteria, Time, Distance
+from platescanner.utils import bbox_iou
 
 from pathlib import Path
 
-from src.bbox.abstract import Bbox
-from src.validator.criteria import CustomCriteria, Time, Distance
-from src.utils import bbox_iou
+import numpy as np
+import cv2
 
 
 class Validator:

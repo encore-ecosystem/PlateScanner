@@ -1,22 +1,23 @@
 from PIL import Image
-from src.utils import get_target_bboxes, get_predicted_bboxes, handle_path, get_model_cli, plot_conf_matrix
-from src import DEFAULT_CONFIDENCE_LEVEL, CALIBRATION_DATASET
-from src.model import Yolo, YoloOBB
+from platescanner.utils import get_target_bboxes, get_predicted_bboxes, handle_path, get_model_cli, plot_conf_matrix
+from platescanner import DEFAULT_CONFIDENCE_LEVEL, CALIBRATION_DATASET, PROJECT_ROOT_PATH
+from platescanner.model import Yolo, YoloOBB
 from matplotlib import pyplot as plt
 from pathlib import Path
 from tqdm import tqdm
 
-from src.utils.draw_bbox import draw_bbox
-from src.validator.criteria import CustomCriteria, Distance, Time
-from src.validator.stat import Validator
+from platescanner.utils.draw_bbox import draw_bbox
+from platescanner.validator.criteria import CustomCriteria, Distance, Time
+from platescanner.validator.stat import Validator
 
-
+import pickle
 
 
 def mode(args):
     config = {
         '-dataset_path'     : None,
         '-output_path'      : None,
+        '-weights_path'     : None,
         '-confidence_level' : DEFAULT_CONFIDENCE_LEVEL,
     }
 
@@ -26,20 +27,13 @@ def mode(args):
     while current < len(args):
         match args[current]:
             case '-dataset_path':
-                path = handle_path(args[current + 1])
-                if not path.exists():
-                    print(f"Dataset path does not exist: {path}")
-                    exit(-1)
-
-                config['-dataset_path'] = args[current + 1]
+                config['-dataset_path'] = handle_path(args[current + 1])
                 current += 1
             case '-output_path':
-                path = handle_path(args[current + 1])
-                if not path.exists():
-                    print(f"Output path does not exist: {path}")
-                    exit(-1)
-
-                config['-output_path'] = args[current + 1]
+                config['-output_path'] = handle_path(args[current + 1])
+                current += 1
+            case '-weights_path':
+                config['-weights_path'] = handle_path(args[current + 1])
                 current += 1
             case '-confidence_level':
                 confidence_level = args[current + 1]
@@ -49,6 +43,10 @@ def mode(args):
 
                 config['-confidence_level'] = float(confidence_level) / 100
                 current += 1
+            case _:
+                print(f"Unknown argument: {args[current]}")
+                exit(-1)
+        current += 1
 
     # validate args
     if config['-dataset_path'] is None:
@@ -60,18 +58,18 @@ def mode(args):
         exit(-1)
 
     # run
-    input_path = Path(config['-dataset_path'])
-    output_path = Path(config['-output_path'])
+    input_path       = Path(config['-dataset_path'])
+    output_path      = Path(config['-output_path'])
     confidence_level = config['-confidence_level']
+    model_path       = config['-weights_path']
 
-
-    model_path = get_model_cli()
     model = (YoloOBB if 'obb' in model_path.stem else Yolo)(model_path)
 
     original_bboxes  = get_target_bboxes(input_path)
     predicted_bboxes = get_predicted_bboxes(input_path, model, confidence_level)
-    v = Validator()
-    v.fit_brightness(CALIBRATION_DATASET)
+
+    with open(PROJECT_ROOT_PATH / 'pretrained_validator.pickle', 'rb') as f:
+        v : Validator = pickle.load(f)
     v.fit_distance(input_path, original_bboxes)
 
     classified_original_bboxes  = v.predict(input_path, original_bboxes)

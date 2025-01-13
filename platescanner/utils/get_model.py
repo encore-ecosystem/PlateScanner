@@ -1,4 +1,4 @@
-from src import MODEL_PATH_FOLDER
+from platescanner import MODEL_PATH_FOLDER
 from pathlib import Path
 
 

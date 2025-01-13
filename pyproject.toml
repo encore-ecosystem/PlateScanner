@@ -14,7 +14,7 @@ python = ">=3.12,<3.13"
 ultralytics = ">=8.3.30"
 clearml = "^1.16.4"
 albumentations = "^2.0.0"
-nodeflow = "^0.1.0"
+nodeflow = "0.1.1"
 pycocotools = "^2.0.8"
 shapely = "^2.0.6"
 torch = "^2.5.1"
@@ -23,6 +23,6 @@ torchvision = "^0.20.1"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
-
-[tool.poetry.scripts]
-platescanner = "platescanner.main:main"
+#
+#[tool.poetry.scripts]
+#platescanner = "platescanner.main:main"

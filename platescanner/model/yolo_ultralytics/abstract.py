@@ -1,14 +1,12 @@
 from nodeflow.builtin import PathVariable, Integer, Boolean
 from nodeflow import Dispenser, func2node
 
-from src.nodeflow_env import train_yolo, load_augmentations, Compose, validate_yolo
-from src.model.model import Model
+from platescanner.nodeflow_env import train_yolo, load_augmentations, Compose, validate_yolo
+from platescanner.model.model import Model
 from pathlib import Path
 from abc import ABCMeta
 
 import albumentations
-
-from src.nodeflow_env.variables import MyPath
 
 
 class YoloBase(Model, metaclass=ABCMeta):
@@ -17,8 +15,8 @@ class YoloBase(Model, metaclass=ABCMeta):
 
     def validate(self, dataset_path: Path, use_clearml: bool):
         Compose(value=albumentations.Compose([
-            albumentations.ToGray(always_apply=True),
-            albumentations.CLAHE(always_apply=True),
+            albumentations.ToGray(p=1.0),
+            albumentations.CLAHE(p=1.0),
         ])) >> func2node(load_augmentations)
         Dispenser(
             model_path   = PathVariable(self.weights_path),
@@ -30,7 +28,7 @@ class YoloBase(Model, metaclass=ABCMeta):
     def fit(self, dataset_path: Path, augmentation: albumentations.Compose, use_clearml: bool):
         Compose(value=augmentation) >> func2node(load_augmentations)
         Dispenser(
-            model_path   = MyPath(self.weights_path),
+            model_path   = PathVariable(self.weights_path),
             dataset_path = PathVariable(dataset_path),
             imgsz        = Integer(1280),
             epochs       = Integer(30),

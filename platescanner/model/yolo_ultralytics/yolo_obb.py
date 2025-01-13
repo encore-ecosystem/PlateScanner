@@ -1,8 +1,8 @@
-from src.utils import bbox_to_total_area_filter, nms
+from platescanner.utils import bbox_to_total_area_filter, nms
 from .abstract import YoloBase
 from ultralytics import YOLO
 from PIL import Image
-from src.bbox import Bbox_4XY, Bbox
+from platescanner.bbox import Bbox_4XY, Bbox
 from typing import Unpack
 from pathlib import Path
 from functools import reduce

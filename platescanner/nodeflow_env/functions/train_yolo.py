@@ -2,7 +2,7 @@ from nodeflow.builtin import PathVariable, Boolean, Result, Integer
 from ultralytics import YOLO
 from clearml import Task
 
-from src.nodeflow_env.variables import MyPath
+from platescanner.nodeflow_env.variables import MyPath
 
 
 def train_yolo(model_path: MyPath, dataset_path: PathVariable, imgsz: Integer, epochs: Integer, use_clearml: Boolean) -> Result:
