@@ -19,6 +19,7 @@ def mode(args):
         '-output_path'      : None,
         '-weights_path'     : None,
         '-confidence_level' : DEFAULT_CONFIDENCE_LEVEL,
+        '-detection_only'   : None,
     }
 
     # parse args
@@ -35,6 +36,21 @@ def mode(args):
             case '-weights_path':
                 config['-weights_path'] = handle_path(args[current + 1])
                 current += 1
+            case '-detection_only':
+                if current + 1 >= len(args):
+                    print("Please, specify a detection-only parameter")
+                    exit(-1)
+
+                match args[current + 1].lower():
+                    case 'true':
+                        config['-detection_only'] = True
+                    case 'false':
+                        config['-detection_only'] = False
+                    case _:
+                        print("Please, specify a detection-only parameter")
+                        exit(-1)
+                current += 1
+
             case '-confidence_level':
                 confidence_level = args[current + 1]
                 if not confidence_level.isdigit() or not 0 <= int(confidence_level) <= 100:
@@ -43,9 +59,11 @@ def mode(args):
 
                 config['-confidence_level'] = float(confidence_level) / 100
                 current += 1
+
             case _:
                 print(f"Unknown argument: {args[current]}")
                 exit(-1)
+
         current += 1
 
     # validate args
@@ -57,6 +75,21 @@ def mode(args):
         print("Missing output path.")
         exit(-1)
 
+    run(config)
+
+def run(config: dict):
+    match config.get('-detection_only'):
+        case True:
+            only_recognition(config)
+        case False:
+            ...
+        case None:
+            ...
+
+
+
+
+def only_recognition(config: dict):
     # run
     input_path       = Path(config['-dataset_path'])
     output_path      = Path(config['-output_path'])

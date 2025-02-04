@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from PIL.ImageFile import ImageFile
 
 
 class Bbox(ABC):
@@ -13,6 +14,10 @@ class Bbox(ABC):
 
     @abstractmethod
     def get_poly(self) -> list[tuple[float, float]]:
+        raise NotImplementedError
+
+    @abstractmethod
+    def crop_on(self, image: ImageFile):
         raise NotImplementedError
 
     @abstractmethod

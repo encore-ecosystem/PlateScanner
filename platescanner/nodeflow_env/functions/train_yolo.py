@@ -2,10 +2,8 @@ from nodeflow.builtin import PathVariable, Boolean, Result, Integer
 from ultralytics import YOLO
 from clearml import Task
 
-from platescanner.nodeflow_env.variables import MyPath
 
-
-def train_yolo(model_path: MyPath, dataset_path: PathVariable, imgsz: Integer, epochs: Integer, use_clearml: Boolean) -> Result:
+def train_yolo(model_path: PathVariable, dataset_path: PathVariable, imgsz: Integer, epochs: Integer, use_clearml: Boolean) -> Result:
     config = {
         "batch"       : -1,
         "imgsz"       : imgsz.value,
@@ -17,7 +15,7 @@ def train_yolo(model_path: MyPath, dataset_path: PathVariable, imgsz: Integer, e
     (__train_yolo_with_clearml if use_clearml.value else __train_yolo_without_clearml)(model_path, config)
     return Result(value=True)
 
-def __train_yolo_with_clearml(model_path: MyPath, config: dict):
+def __train_yolo_with_clearml(model_path: PathVariable, config: dict):
     model_variant = model_path.value.stem
     task = Task.init(
         project_name = "PlateScanner",
@@ -29,7 +27,7 @@ def __train_yolo_with_clearml(model_path: MyPath, config: dict):
     task.connect(config)
     model.train(**config)
 
-def __train_yolo_without_clearml(model_path: MyPath, config: dict):
+def __train_yolo_without_clearml(model_path: PathVariable, config: dict):
     YOLO(model_path.value.__str__()).train(**config)
 
 

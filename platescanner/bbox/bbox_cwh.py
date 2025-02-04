@@ -1,3 +1,5 @@
+from PIL.ImageFile import ImageFile
+
 from .abstract import Bbox
 from shapely.geometry import Polygon, box
 from platescanner.bbox.bbox_2xy import Bbox_2xy
@@ -10,6 +12,18 @@ class Bbox_CWH(Bbox):
 
     def area(self) -> float:
         return self.bbox[2] * self.bbox[3]
+
+    def get_poly(self) -> list[tuple[float, float]]:
+        poly_a = Polygon([
+            (self.bbox[0] - self.bbox[2] / 2, self.bbox[1] - self.bbox[3] / 2),
+            (self.bbox[0] + self.bbox[2] / 2, self.bbox[1] - self.bbox[3] / 2),
+            (self.bbox[0] + self.bbox[2] / 2, self.bbox[1] + self.bbox[3] / 2),
+            (self.bbox[0] - self.bbox[2] / 2, self.bbox[1] + self.bbox[3] / 2),
+        ])
+        return list(poly_a.exterior.coords)
+
+    def crop_on(self, image: ImageFile):
+        raise NotImplementedError()
 
     def __and__(self, other: 'Bbox_CWH') -> float:
         if isinstance(other, Bbox_CWH):
@@ -35,17 +49,6 @@ class Bbox_CWH(Bbox):
             ])
             poly_b = box(*other.bbox)
             return poly_a.intersection(poly_b).area
-
-
-    def get_poly(self) -> list[tuple[float, float]]:
-        poly_a = Polygon([
-            (self.bbox[0] - self.bbox[2] / 2, self.bbox[1] - self.bbox[3] / 2),
-            (self.bbox[0] + self.bbox[2] / 2, self.bbox[1] - self.bbox[3] / 2),
-            (self.bbox[0] + self.bbox[2] / 2, self.bbox[1] + self.bbox[3] / 2),
-            (self.bbox[0] - self.bbox[2] / 2, self.bbox[1] + self.bbox[3] / 2),
-        ])
-        return list(poly_a.exterior.coords)
-
 
 __all__ = [
     'Bbox_CWH'
