@@ -2,8 +2,8 @@ from paddleocr import PaddleOCR
 
 from platescanner import DEFAULT_CONFIDENCE_LEVEL
 from platescanner.model import Yolo, YoloOBB
-from platescanner.utils import handle_path, handle_confidence_level, draw_bbox, align_license_plate, \
-    preprocess_license_plate, preprocess_license_plate_without_aug
+from platescanner.utils import handle_path, handle_confidence_level, draw_bbox, \
+    preprocess_license_plate
 
 from tqdm import tqdm
 from PIL import Image

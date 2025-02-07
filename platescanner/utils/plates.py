@@ -1,5 +1,7 @@
+import torch
+import torchvision.transforms as T
 from PIL.Image import Image
-from numpy import ndarray
+from PIL import Image
 
 import albumentations as A
 import numpy as np
@@ -13,70 +15,62 @@ sr.readModel(FSR_MODEL_PATH.__str__())
 sr.setModel("fsrcnn", 3)
 
 
-def preprocess_for_alignment(image: ndarray) -> ndarray:
-    """Предварительная обработка для выделения контуров."""
-    if not (image.ndim == 2 or image.shape[-1] == 1):
-        image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-
-    blurred = cv2.GaussianBlur(image, (5, 5), 0)
-    _, binary = cv2.threshold(blurred, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-    return binary
-
-
-def align_license_plate(plate_image: Image) -> ndarray:
-    """Выравнивание номера без изменений ориентации."""
-    plate_image = np.array(plate_image)
-    binary = preprocess_for_alignment(plate_image)
-
-    contours, _ = cv2.findContours(binary, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-
-    if contours:
-        contours = sorted(contours, key=cv2.contourArea, reverse=True)
-        rect = cv2.minAreaRect(contours[0])
-        box = cv2.boxPoints(rect)
-        box = np.int32(box)
-
-        # Размеры выровненного изображения
-        width, height = int(rect[1][0]), int(rect[1][1])
-
-        src_pts = box.astype("float32")
-        dst_pts = np.array(
-            [[0, height - 1], [0, 0], [width - 1, 0], [width - 1, height - 1]],
-            dtype="float32"
-        )
-
-        m = cv2.getPerspectiveTransform(src_pts, dst_pts)
-        aligned = cv2.warpPerspective(plate_image, m, (width, height))
-        if aligned.shape[0] > aligned.shape[1]:
-            aligned = cv2.rotate(aligned, cv2.ROTATE_90_CLOCKWISE)
-        return aligned
-
-    return plate_image
-
-def preprocess_license_plate(plate_image):
-    resized = cv2.resize(plate_image, None, fx=3, fy=3, interpolation=cv2.INTER_CUBIC)
+def preprocess_license_plate(plate_image: Image):
+    plate_image_np = pil_to_np(plate_image)
+    super_resolved = sr.upsample(plate_image_np)
     augmented = A.Compose([
-        A.CLAHE(clip_limit=3.0, tile_grid_size=(8, 8), p=1.0),
-        A.GaussianBlur(blur_limit=(3, 5), p=1.0),
-        A.Sharpen(alpha=(0.2, 0.5), lightness=(0.5, 2.0), p=1.0),
-        A.MedianBlur(blur_limit=3, p=0.5),
-    ])(image=resized)['image']
-    super_resolved = sr.upsample(augmented)
-    return super_resolved
+        A.CLAHE(clip_limit=2.0, tile_grid_size=(8, 8), p=1.0),
+    ])(image=super_resolved)['image']
+
+    # MIGHT BE USEFUL
+    # if len(augmented.shape) == 2:  # если изображение черно-белое
+    #     augmented = cv2.cvtColor(augmented, cv2.COLOR_GRAY2BGR)
+    # augmented = cv2.fastNlMeansDenoisingColored(augmented, None, 5, 1, 7, 21)
+
+    super_resolved_pil = np_to_pil(augmented)
+    return super_resolved_pil
 
 
-def preprocess_license_plate_without_aug(plate_image):
-    print("Hello FSR")
-    augmented = A.Compose([
-        A.Sharpen(alpha=(0.2, 0.5), lightness=(0.5, 2.0), p=1.0),
-    ])(image=plate_image)['image']
-    super_resolved = sr.upsample(augmented)
-    return super_resolved
+class RecognitionModel:
+    models = ['parseq', 'parseq_tiny', 'abinet', 'crnn', 'trba', 'vitstr']
+    def __init__(self):
+        self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+        self._model_cache = {}
+        self._preprocess = T.Compose([
+            T.Resize((32, 128), T.InterpolationMode.BICUBIC),
+            T.ToTensor(),
+            T.Normalize(0.5, 0.5)
+        ])
 
+    def _get_model(self, name):
+        if name in self._model_cache:
+            return self._model_cache[name]
+        model = torch.hub.load('baudm/parseq', name, pretrained=True).eval().to(self.device)
+        self._model_cache[name] = model
+        return model
+
+    @torch.inference_mode()
+    def __call__(self, model_name, image):
+        if image is None:
+            return '', []
+        model = self._get_model(model_name)
+        image = self._preprocess(image.convert('RGB')).unsqueeze(0).to(self.device)
+        # Greedy decoding
+        pred = model(image).softmax(-1)
+        label, _ = model.tokenizer.decode(pred)
+        raw_label, raw_confidence = model.tokenizer.decode(pred, raw=True)
+        # Format confidence values
+        max_len = 25 if model_name == 'crnn' else len(label[0]) + 1
+        conf = list(map('{:0.1f}'.format, raw_confidence[0][:max_len].tolist()))
+        return label[0], [raw_label[0][:max_len], conf]
+
+def pil_to_np(image):
+    return np.array(image)
+
+def np_to_pil(image_np):
+    return Image.fromarray(image_np)
 
 __all__ = [
-    'preprocess_for_alignment',
-    'align_license_plate',
     'preprocess_license_plate',
-    'preprocess_license_plate_without_aug',
+    'RecognitionModel',
 ]

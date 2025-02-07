@@ -3,11 +3,10 @@ import re
 from typing import Optional
 
 from PIL import Image
-from paddleocr import PaddleOCR
 
-from platescanner.utils import get_target_bboxes, get_predicted_bboxes, handle_path, get_model_cli, plot_conf_matrix, \
-    align_license_plate, preprocess_license_plate, preprocess_license_plate_without_aug
-from platescanner import DEFAULT_CONFIDENCE_LEVEL, CALIBRATION_DATASET, PROJECT_ROOT_PATH
+from platescanner.utils import get_target_bboxes, get_predicted_bboxes, handle_path, plot_conf_matrix, \
+    preprocess_license_plate, RecognitionModel
+from platescanner import DEFAULT_CONFIDENCE_LEVEL, PROJECT_ROOT_PATH
 from platescanner.model import Yolo, YoloOBB
 from matplotlib import pyplot as plt
 from pathlib import Path
@@ -140,8 +139,10 @@ def overall_pipeline(config: dict):
     input_path = Path(config['-dataset_path'])
     output_path = Path(config['-output_path'])
 
-    recognized_text = {}
-    ground_truth_text = {}
+    recognized_text_all_images = {}
+    ground_truth_text_all_images = {}
+
+    rec_model = RecognitionModel()
     for filtered_predicted_bboxes, filtered_original_bboxes, images_samples in detect_bboxes(config):
         for image_stem in tqdm(images_samples, desc="Processing images with recognition"):
             img_abs_path = (input_path / 'valid' / 'images').glob(f"{image_stem}.*").__next__()
@@ -155,40 +156,27 @@ def overall_pipeline(config: dict):
 
             for idx, bbox in enumerate(filtered_predicted_bboxes[image_stem]):
                 plate_image = bbox[0].crop_on(image)
-                aligned = align_license_plate(plate_image)
+                preprocessed_plate = preprocess_license_plate(plate_image)
 
-                preprocessed_plate = preprocess_license_plate(aligned)
-                ocr = PaddleOCR(
-                    use_angle_cls=True,
-                    lang='en',
-                    det_db_box_thresh=0.4,
-                    rec_algorithm='SVTR_LCNet',
-                    use_space_char=False,
-                )
+                recognized_text, raw_output = rec_model.__call__("parseq", preprocessed_plate)
 
-                text = "NOT RECOGNIZED"
-                try:
-                    # Используем cls=True для лучшего распознавания
-                    result = ocr.ocr(preprocessed_plate, cls=True)
-                    if result and result[0]:
-                        sorted_lines = sorted(result[0], key=lambda line: len(line[1][0]), reverse=True)
-                        text = "".join([line[1][0] for line in sorted_lines])
-                    else:
-                        preprocessed_plate = preprocess_license_plate_without_aug(aligned)
-                        result = ocr.ocr(preprocessed_plate, cls=True)
-                        if result and result[0]:
-                            sorted_lines = sorted(result[0], key=lambda line: len(line[1][0]), reverse=True)
-                            text = "".join([line[1][0] for line in sorted_lines])
-                    text = re.sub(r'[^A-Za-z0-9]', '', text).upper()
-                except IndexError:
-                    pass
+                if recognized_text and len(recognized_text) > 5:
+                    if len(recognized_text) >= 9:
+                        recognized_text = recognized_text[:9]
+                    recognized_text = re.sub(r"[^A-Za-z0-9]", "", recognized_text).upper()
+                    recognized_text = re.sub(r'V', 'Y', recognized_text)
+                    recognized_text = recognized_text.replace('I', '')
+                    if recognized_text[0] == "8":
+                        recognized_text = recognized_text.replace("8", "В", 1)
+                    elif recognized_text[0] == "0":
+                        recognized_text = recognized_text.replace("0", "O", 1)
 
-                recognized_text[image_stem] = recognized_text.get(image_stem, []) + [(bbox[0], text)]
+                recognized_text_all_images[image_stem] = recognized_text_all_images.get(image_stem, []) + [(bbox[0], recognized_text)]
 
                 draw_bbox(
                         axs=axs,
                         bbox=bbox[0].to_image_scale(width, height),
-                        text=f"{text}",
+                        text=f"{recognized_text}",
                         text_h_shift=int(-0.05 * width),
                         text_v_shift=int(-0.01 * height),
                         text_color='green',
@@ -197,7 +185,7 @@ def overall_pipeline(config: dict):
 
             # DRAW GT BBOXES
             for bbox, criteria, text in filtered_original_bboxes.get(image_stem, []):
-                ground_truth_text[image_stem] = ground_truth_text.get(image_stem, []) + [(bbox, text)]
+                ground_truth_text_all_images[image_stem] = ground_truth_text_all_images.get(image_stem, []) + [(bbox, text)]
                 draw_bbox(
                         axs=axs,
                         bbox=bbox.to_image_scale(width, height),
@@ -211,7 +199,7 @@ def overall_pipeline(config: dict):
             plt.savefig(output_path / f"{image_stem}.png", dpi=300)
             plt.close(fig)
 
-        lev_scores, business_scores = evaluate_metrics(ground_truth_text, recognized_text)
+        lev_scores, business_scores = evaluate_metrics(ground_truth_text_all_images, recognized_text_all_images)
         print('\n\n')
         print(lev_scores)
         print(business_scores)
