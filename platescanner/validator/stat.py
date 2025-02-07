@@ -89,17 +89,17 @@ class Validator:
 
         for image_name in original_bboxes.keys():
             filtered_original_bboxes[image_name] = filtered_original_bboxes.get(image_name, [])
-            for bbox, bbox_criteria in original_bboxes[image_name]:
+            for bbox, bbox_criteria, text in original_bboxes[image_name]:
                 if bbox.category != selected_category:
                     continue
                 if bbox_criteria != criteria:
                     continue
-                filtered_original_bboxes[image_name] += [(bbox, bbox_criteria)]
+                filtered_original_bboxes[image_name] += [(bbox, bbox_criteria, text)]
 
         for image_name in predicted_bboxes.keys():
             filtered_predicted_bboxes[image_name] = []
             for predicted_bbox, bbox_criteria in predicted_bboxes[image_name]:
-                for original_bbox, original_criteria in original_bboxes[image_name]:
+                for original_bbox, original_criteria, _ in original_bboxes[image_name]:
                     if bbox_iou(original_bbox, predicted_bbox) > threshold:
                         bbox_criteria.distance = original_criteria.distance
                         bbox_criteria.time     = original_criteria.time
@@ -116,7 +116,7 @@ class Validator:
             for predicted_bbox, _ in filtered_predicted_bboxes[image_name]:
                 flag = False
                 flag_orig = None
-                for original_bbox, _ in filtered_original_bboxes[image_name]:
+                for original_bbox, _, _ in filtered_original_bboxes[image_name]:
                     if bbox_iou(original_bbox, predicted_bbox) > threshold and \
                         original_bbox not in classified_bboxes and \
                         predicted_bbox not in classified_bboxes:

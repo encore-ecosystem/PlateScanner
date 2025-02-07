@@ -1,3 +1,5 @@
+from typing import Optional
+
 from PIL import Image
 from paddleocr import PaddleOCR
 
@@ -13,7 +15,8 @@ from platescanner.utils.draw_bbox import draw_bbox
 from platescanner.validator.criteria import CustomCriteria, Distance, Time
 from platescanner.validator.stat import Validator
 
-from typing import Generator
+from cvtk.utils.determinator import determine_dataset
+from cvtk.supported_datasets.mvp import MVP_Dataset
 
 import pickle
 
@@ -133,12 +136,20 @@ def only_detection(config: dict):
 def overall_pipeline(config: dict):
     input_path = Path(config['-dataset_path'])
     output_path = Path(config['-output_path'])
+
     for filtered_predicted_bboxes, filtered_original_bboxes, images_samples in detect_bboxes(config):
         for image_stem in tqdm(images_samples, desc="Processing images with recognition"):
+            img_abs_path = (input_path / 'valid' / 'images').glob(f"{image_stem}.*").__next__()
+            image = Image.open(img_abs_path)
+            width, height = image.size
+
+            fig, axs = plt.subplots()
+            axs.imshow(image, cmap='gray')
+            axs.axis('off')
+            fig.patch.set_visible(False)
+
             for idx, bbox in enumerate(filtered_predicted_bboxes[image_stem]):
-                img_abs_path = (input_path / 'valid' / 'images').glob(f"{image_stem}.*").__next__()
-                image = Image.open(img_abs_path)
-                plate_image = bbox.crop_on(image)
+                plate_image = bbox[0].crop_on(image)
                 aligned = align_license_plate(plate_image)
 
                 preprocessed_plate = preprocess_license_plate(aligned)
@@ -164,6 +175,35 @@ def overall_pipeline(config: dict):
                 except IndexError:
                     pass
 
+                print(text)
+
+                draw_bbox(
+                        axs=axs,
+                        bbox=bbox[0].to_image_scale(width, height),
+                        text=f"{text}",
+                        text_h_shift=int(-0.05 * width),
+                        text_v_shift=int(-0.01 * height),
+                        text_color='green',
+                        edge_color='green',
+                )
+
+            # DRAW GT BBOXES
+            for bbox, criteria, text in filtered_original_bboxes.get(image_stem, []):
+                draw_bbox(
+                        axs=axs,
+                        bbox=bbox.to_image_scale(width, height),
+                        text=text,
+                        text_h_shift=int(-0.01 * width),
+                        text_v_shift=int(0.05 * height),
+                        text_color='red',
+                        edge_color='red',
+                )
+            # SAVE IMAGES WITH RECOGNIZED TEXT
+            plt.savefig(output_path / f"{image_stem}.png", dpi=300)
+            plt.close(fig)
+            
+            # evaluate_metrics()
+
 def detect_bboxes(config: dict):
     # run
     input_path = Path(config['-dataset_path'])
@@ -182,6 +222,12 @@ def detect_bboxes(config: dict):
 
     classified_original_bboxes = v.predict(input_path, original_bboxes)
     classified_predicted_bboxes = v.predict(input_path, predicted_bboxes)
+
+    original_dataset = determine_dataset(input_path)
+    original_bboxes_with_text = None
+    if isinstance(original_dataset, MVP_Dataset):
+        original_bboxes_with_text = original_dataset.attributes
+    classified_original_bboxes = add_rec_text_to_bboxes(classified_original_bboxes, original_bboxes_with_text)
 
     while True:
         print('=' * 64)
@@ -230,7 +276,18 @@ def detect_bboxes(config: dict):
                 continue
             break
         images_samples = list(original_bboxes.keys())[:num]
+
         yield filtered_predicted_bboxes, filtered_original_bboxes, images_samples
+
+def add_rec_text_to_bboxes(bboxes_without_text: dict, bboxes_with_text: Optional[dict]) -> dict:
+    if bboxes_with_text is None:
+        return bboxes_without_text
+
+    for image_stem, bboxes in bboxes_with_text['valid'].items():
+        for idx in range(len(bboxes['Detection']['bboxes'])):
+            bboxes_without_text[image_stem][idx] += (bboxes_with_text['valid'][image_stem]['Detection']['bboxes'][idx]['recognition_text'],)
+
+    return bboxes_without_text
 
 
 __all__ = [
