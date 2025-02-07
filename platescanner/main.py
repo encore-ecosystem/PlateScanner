@@ -35,14 +35,14 @@ predict:
     '-dataset_path'     : None                      # path to dataset directory
     '-output_path'      : None                      # path to output directory (should exists and be empty)
     '-confidence_level' : DEFAULT_CONFIDENCE_LEVEL  # confidence level
-    '-detection_only'   : False                     #  True - detection only; False - detection + recognition
+    '-detection_only'   : False                     # True - detection only; False - detection + recognition
     
 validate:
     '-weights_path'     : None                      # path to model's weights file
     '-dataset_path'     : None                      # path to dataset directory
     '-output_path'      : None                      # path to output directory (should exists and be empty)
     '-confidence_level' : DEFAULT_CONFIDENCE_LEVEL  # confidence level
-    '-detection_only'   : None                      # None - overall pipeline; True - detection only; False - recognition only
+    '-detection_only'   : False                     # True - detection only; False - detection + recognition
 
 find_confidence:
     '-weights_path'     : None                      # path to model's weights file

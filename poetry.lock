@@ -112,14 +112,14 @@ tests-mypy = ["mypy (>=1.11.1)", "pytest-mypy-plugins"]
 
 [[package]]
 name = "beautifulsoup4"
-version = "4.13.2"
+version = "4.13.3"
 description = "Screen-scraping library"
 optional = false
 python-versions = ">=3.7.0"
 groups = ["main"]
 files = [
-    {file = "beautifulsoup4-4.13.2-py3-none-any.whl", hash = "sha256:b0ebbcecbfbed2f28e07fb8d004494dfb3030711874a034551ac52008b87a1d1"},
-    {file = "beautifulsoup4-4.13.2.tar.gz", hash = "sha256:da9184389e6848818cf31c970ba3cbe6f33c2b8fbabd70d5bd4a2bfa0c1c4272"},
+    {file = "beautifulsoup4-4.13.3-py3-none-any.whl", hash = "sha256:99045d7d3f08f91f0d656bc9b7efbae189426cd913d830294a15eefa0ea4df16"},
+    {file = "beautifulsoup4-4.13.3.tar.gz", hash = "sha256:1bd32405dacc920b42b83ba01644747ed77456a65760e285fbc47633ceddaf8b"},
 ]
 
 [package.dependencies]
@@ -367,6 +367,31 @@ docs = ["furo", "sphinx (>=7.2)", "sphinx-copybutton"]
 mypy = ["contourpy[bokeh,docs]", "docutils-stubs", "mypy (==1.11.1)", "types-Pillow"]
 test = ["Pillow", "contourpy[test-no-images]", "matplotlib"]
 test-no-images = ["pytest", "pytest-cov", "pytest-rerunfailures", "pytest-xdist", "wurlitzer"]
+
+[[package]]
+name = "cvtk"
+version = "0.1.0"
+description = ""
+optional = false
+python-versions = "^3.10"
+groups = ["main"]
+files = []
+develop = false
+
+[package.dependencies]
+nodeflow = "^0.1.1"
+opencv-python = "^4.10.0.84"
+pillow = "^11.0.0"
+pyyaml = "^6.0.2"
+shapely = "^2.0.6"
+toml = "^0.10.2"
+tqdm = "^4.66.6"
+
+[package.source]
+type = "git"
+url = "https://github.com/encore-ecosystem/CVTK.git"
+reference = "HEAD"
+resolved_reference = "a71460b9799cf6f8f2b9ca5861320e8384101e4d"
 
 [[package]]
 name = "cycler"
@@ -3026,6 +3051,18 @@ xml = ["defusedxml", "lxml"]
 zarr = ["fsspec", "zarr (<3)"]
 
 [[package]]
+name = "toml"
+version = "0.10.2"
+description = "Python Library for Tom's Obvious, Minimal Language"
+optional = false
+python-versions = ">=2.6, !=3.0.*, !=3.1.*, !=3.2.*"
+groups = ["main"]
+files = [
+    {file = "toml-0.10.2-py2.py3-none-any.whl", hash = "sha256:806143ae5bfb6a3c6e736a764057db0e6a0e05e338b5630894a5f779cabb4f9b"},
+    {file = "toml-0.10.2.tar.gz", hash = "sha256:b3bda1d108d5dd99f4a20d24d9c348e91c4db7ab1b749200bded2f839ccbe68f"},
+]
+
+[[package]]
 name = "tomli"
 version = "2.2.1"
 description = "A lil' TOML parser"
@@ -3223,14 +3260,14 @@ files = [
 
 [[package]]
 name = "ultralytics"
-version = "8.3.71"
+version = "8.3.72"
 description = "Ultralytics YOLO 🚀 for SOTA object detection, multi-object tracking, instance segmentation, pose estimation and image classification."
 optional = false
 python-versions = ">=3.8"
 groups = ["main"]
 files = [
-    {file = "ultralytics-8.3.71-py3-none-any.whl", hash = "sha256:5b4e622a9e084a7956fd030ebf288e02f082b26bfe84ac1e9276e9ef5f6cf99e"},
-    {file = "ultralytics-8.3.71.tar.gz", hash = "sha256:560cc54236190de03a1a1343a913d75406c39d425ff3062b65c7b59537424f5e"},
+    {file = "ultralytics-8.3.72-py3-none-any.whl", hash = "sha256:35aa390b075037c47562e8a72e8043438e919462082addf3e223c073e8b673e7"},
+    {file = "ultralytics-8.3.72.tar.gz", hash = "sha256:8c4a19e008929e9478036c5e6a443819b0712457abd1d6c05e1e1322e9821537"},
 ]
 
 [package.dependencies]
@@ -3254,7 +3291,7 @@ tqdm = ">=4.64.0"
 ultralytics-thop = ">=2.0.0"
 
 [package.extras]
-dev = ["beautifulsoup4 (<=4.12.3)", "coverage[toml]", "ipython", "mkdocs (>=1.6.0)", "mkdocs-macros-plugin (>=1.0.5)", "mkdocs-material (>=9.5.9)", "mkdocs-redirects", "mkdocs-ultralytics-plugin (>=0.1.16)", "mkdocstrings[python]", "pytest", "pytest-cov"]
+dev = ["beautifulsoup4 (<=4.12.3)", "coverage[toml]", "ipython", "mkdocs (>=1.6.0)", "mkdocs-macros-plugin (>=1.0.5)", "mkdocs-material (>=9.5.9)", "mkdocs-redirects", "mkdocs-ultralytics-plugin (>=0.1.17)", "mkdocstrings[python]", "pytest", "pytest-cov"]
 export = ["coremltools (>=7.0)", "flatbuffers (>=23.5.26,<100)", "h5py (!=3.11.0)", "keras", "onnx (>=1.12.0)", "openvino (>=2024.0.0)", "scikit-learn (>=1.3.2)", "tensorflow (>=2.0.0)", "tensorflowjs (>=3.9.0)", "tensorstore (>=0.1.63)"]
 extra = ["albumentations (>=1.4.6)", "hub-sdk (>=0.0.12)", "ipython", "pycocotools (>=2.0.7)"]
 logging = ["comet", "dvclive (>=2.12.0)", "tensorboard (>=2.13.0)"]
@@ -3297,4 +3334,4 @@ zstd = ["zstandard (>=0.18.0)"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.12,<3.13"
-content-hash = "ec6680f63d948f42dd13351eb6010997da1eca2a89b4f1ce8eb4f5593755deb2"
+content-hash = "258f61d11cad356b672c95dab61428bdef90d49d525646c942226afd88a57ddd"

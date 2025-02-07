@@ -1,5 +1,8 @@
 from PIL import Image
-from platescanner.utils import get_target_bboxes, get_predicted_bboxes, handle_path, get_model_cli, plot_conf_matrix
+from paddleocr import PaddleOCR
+
+from platescanner.utils import get_target_bboxes, get_predicted_bboxes, handle_path, get_model_cli, plot_conf_matrix, \
+    align_license_plate, preprocess_license_plate, preprocess_license_plate_without_aug
 from platescanner import DEFAULT_CONFIDENCE_LEVEL, CALIBRATION_DATASET, PROJECT_ROOT_PATH
 from platescanner.model import Yolo, YoloOBB
 from matplotlib import pyplot as plt
@@ -10,6 +13,8 @@ from platescanner.utils.draw_bbox import draw_bbox
 from platescanner.validator.criteria import CustomCriteria, Distance, Time
 from platescanner.validator.stat import Validator
 
+from typing import Generator
+
 import pickle
 
 
@@ -19,7 +24,7 @@ def mode(args):
         '-output_path'      : None,
         '-weights_path'     : None,
         '-confidence_level' : DEFAULT_CONFIDENCE_LEVEL,
-        '-detection_only'   : None,
+        '-detection_only'   : False,
     }
 
     # parse args
@@ -80,36 +85,106 @@ def mode(args):
 def run(config: dict):
     match config.get('-detection_only'):
         case True:
-            only_recognition(config)
+            only_detection(config)
         case False:
-            ...
-        case None:
-            ...
+            overall_pipeline(config)
 
 
-
-
-def only_recognition(config: dict):
+def only_detection(config: dict):
     # run
-    input_path       = Path(config['-dataset_path'])
-    output_path      = Path(config['-output_path'])
+    input_path = Path(config['-dataset_path'])
+    output_path = Path(config['-output_path'])
+
+    for filtered_predicted_bboxes, filtered_original_bboxes, images_samples in detect_bboxes(config):
+        for image_stem in tqdm(images_samples, desc="Saving validation images"):
+            image = Image.open((input_path / 'valid' / 'images').glob(f'{image_stem}.*').__next__())
+            width, height = image.size
+
+            fig, axs = plt.subplots()
+            axs.imshow(image, cmap='gray')
+            axs.axis('off')
+            fig.patch.set_visible(False)
+
+            for bbox, criteria in filtered_original_bboxes.get(image_stem, []):
+                draw_bbox(
+                    axs=axs,
+                    bbox=bbox.to_image_scale(width, height),
+                    text=criteria.__repr__(),
+                    text_h_shift=int(-0.05 * width),
+                    text_v_shift=int(0.05 * height),
+                    text_color='red',
+                    edge_color='red',
+                )
+
+            for bbox, criteria in filtered_predicted_bboxes.get(image_stem, []):
+                draw_bbox(
+                    axs=axs,
+                    bbox=bbox.to_image_scale(width, height),
+                    text=f"{criteria.__repr__()} {bbox.confidence:.2f}",
+                    text_h_shift=int(-0.08 * width),
+                    text_v_shift=int(-0.01 * height),
+                    text_color='green',
+                    edge_color='green',
+                )
+
+            plt.savefig(output_path / f"{image_stem}.png", dpi=300)
+            plt.close(fig)
+
+def overall_pipeline(config: dict):
+    input_path = Path(config['-dataset_path'])
+    output_path = Path(config['-output_path'])
+    for filtered_predicted_bboxes, filtered_original_bboxes, images_samples in detect_bboxes(config):
+        for image_stem in tqdm(images_samples, desc="Processing images with recognition"):
+            for idx, bbox in enumerate(filtered_predicted_bboxes[image_stem]):
+                img_abs_path = (input_path / 'valid' / 'images').glob(f"{image_stem}.*").__next__()
+                image = Image.open(img_abs_path)
+                plate_image = bbox.crop_on(image)
+                aligned = align_license_plate(plate_image)
+
+                preprocessed_plate = preprocess_license_plate(aligned)
+                ocr = PaddleOCR(
+                    use_angle_cls=True,
+                    lang='en',
+                    det_db_box_thresh=0.4,
+                    rec_algorithm='SVTR_LCNet',
+                    use_space_char=False,
+                )
+
+                text = "NOT RECOGNIZED"
+                try:
+                    # Используем cls=True для лучшего распознавания
+                    result = ocr.ocr(preprocessed_plate, cls=True)
+                    if result and result[0]:
+                        text = "".join([line[1][0] for line in result[0]])
+                    else:
+                        preprocessed_plate = preprocess_license_plate_without_aug(aligned)
+                        result = ocr.ocr(preprocessed_plate, cls=True)
+                        if result and result[0]:
+                            text = "".join([line[1][0] for line in result[0]])
+                except IndexError:
+                    pass
+
+def detect_bboxes(config: dict):
+    # run
+    input_path = Path(config['-dataset_path'])
+    output_path = Path(config['-output_path'])
     confidence_level = config['-confidence_level']
-    model_path       = config['-weights_path']
+    model_path = config['-weights_path']
 
     model = (YoloOBB if 'obb' in model_path.stem else Yolo)(model_path)
 
-    original_bboxes  = get_target_bboxes(input_path)
+    original_bboxes = get_target_bboxes(input_path)
     predicted_bboxes = get_predicted_bboxes(input_path, model, confidence_level)
 
     with open(PROJECT_ROOT_PATH / 'pretrained_validator.pickle', 'rb') as f:
-        v : Validator = pickle.load(f)
+        v: Validator = pickle.load(f)
     v.fit_distance(input_path, original_bboxes)
 
-    classified_original_bboxes  = v.predict(input_path, original_bboxes)
+    classified_original_bboxes = v.predict(input_path, original_bboxes)
     classified_predicted_bboxes = v.predict(input_path, predicted_bboxes)
 
     while True:
-        print('='*64)
+        print('=' * 64)
         print("Choose the distance criteria:")
         print("0) Close\n1) Middle\n2) FAR")
         distance = input("[any] >> ")
@@ -155,43 +230,8 @@ def only_recognition(config: dict):
                 continue
             break
         images_samples = list(original_bboxes.keys())[:num]
+        yield filtered_predicted_bboxes, filtered_original_bboxes, images_samples
 
-        #
-        # Save sample images
-        #
-        for image_stem in tqdm(images_samples, desc="Saving validation images"):
-            image = Image.open((input_path / 'valid' / 'images').glob(f'{image_stem}.*').__next__())
-            width, height = image.size
-
-            fig, axs = plt.subplots()
-            axs.imshow(image, cmap='gray')
-            axs.axis('off')
-            fig.patch.set_visible(False)
-
-            for bbox, criteria in filtered_original_bboxes.get(image_stem, []):
-                draw_bbox(
-                    axs          = axs,
-                    bbox         = bbox.to_image_scale(width, height),
-                    text         = criteria.__repr__(),
-                    text_h_shift = int(-0.05 * width),
-                    text_v_shift = int(0.05 * height),
-                    text_color   = 'red',
-                    edge_color   = 'red',
-                )
-
-            for bbox, criteria in filtered_predicted_bboxes.get(image_stem, []):
-                draw_bbox(
-                    axs          = axs,
-                    bbox         = bbox.to_image_scale(width, height),
-                    text         = f"{criteria.__repr__()} {bbox.confidence:.2f}",
-                    text_h_shift = int(-0.08 * width),
-                    text_v_shift = int(-0.01 * height),
-                    text_color   = 'green',
-                    edge_color   = 'green',
-                )
-
-            plt.savefig(output_path / f"{image_stem}.png", dpi=300)
-            plt.close(fig)
 
 __all__ = [
     'mode'
