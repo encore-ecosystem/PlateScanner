@@ -1,3 +1,5 @@
+import re
+
 from typing import Optional
 
 from PIL import Image
@@ -12,6 +14,7 @@ from pathlib import Path
 from tqdm import tqdm
 
 from platescanner.utils.draw_bbox import draw_bbox
+from platescanner.utils.recognition_metrics import evaluate_metrics
 from platescanner.validator.criteria import CustomCriteria, Distance, Time
 from platescanner.validator.stat import Validator
 
@@ -137,6 +140,8 @@ def overall_pipeline(config: dict):
     input_path = Path(config['-dataset_path'])
     output_path = Path(config['-output_path'])
 
+    recognized_text = {}
+    ground_truth_text = {}
     for filtered_predicted_bboxes, filtered_original_bboxes, images_samples in detect_bboxes(config):
         for image_stem in tqdm(images_samples, desc="Processing images with recognition"):
             img_abs_path = (input_path / 'valid' / 'images').glob(f"{image_stem}.*").__next__()
@@ -166,16 +171,19 @@ def overall_pipeline(config: dict):
                     # Используем cls=True для лучшего распознавания
                     result = ocr.ocr(preprocessed_plate, cls=True)
                     if result and result[0]:
-                        text = "".join([line[1][0] for line in result[0]])
+                        sorted_lines = sorted(result[0], key=lambda line: len(line[1][0]), reverse=True)
+                        text = "".join([line[1][0] for line in sorted_lines])
                     else:
                         preprocessed_plate = preprocess_license_plate_without_aug(aligned)
                         result = ocr.ocr(preprocessed_plate, cls=True)
                         if result and result[0]:
-                            text = "".join([line[1][0] for line in result[0]])
+                            sorted_lines = sorted(result[0], key=lambda line: len(line[1][0]), reverse=True)
+                            text = "".join([line[1][0] for line in sorted_lines])
+                    text = re.sub(r'[^A-Za-z0-9]', '', text).upper()
                 except IndexError:
                     pass
 
-                print(text)
+                recognized_text[image_stem] = recognized_text.get(image_stem, []) + [(bbox[0], text)]
 
                 draw_bbox(
                         axs=axs,
@@ -189,6 +197,7 @@ def overall_pipeline(config: dict):
 
             # DRAW GT BBOXES
             for bbox, criteria, text in filtered_original_bboxes.get(image_stem, []):
+                ground_truth_text[image_stem] = ground_truth_text.get(image_stem, []) + [(bbox, text)]
                 draw_bbox(
                         axs=axs,
                         bbox=bbox.to_image_scale(width, height),
@@ -201,8 +210,14 @@ def overall_pipeline(config: dict):
             # SAVE IMAGES WITH RECOGNIZED TEXT
             plt.savefig(output_path / f"{image_stem}.png", dpi=300)
             plt.close(fig)
-            
-            # evaluate_metrics()
+
+        lev_scores, business_scores = evaluate_metrics(ground_truth_text, recognized_text)
+        print('\n\n')
+        print(lev_scores)
+        print(business_scores)
+        print('\n')
+        print(sum(lev_scores.values()) / len(lev_scores.values()))
+        print(sum(business_scores.values()) / len(business_scores.values()))
 
 def detect_bboxes(config: dict):
     # run
