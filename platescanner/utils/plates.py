@@ -17,15 +17,14 @@ sr.setModel("fsrcnn", 3)
 
 def preprocess_license_plate(plate_image: Image):
     plate_image_np = pil_to_np(plate_image)
+    if not(plate_image_np.ndim == 2 or plate_image_np.shape[-1] == 1):
+        plate_image_np = A.ToGray(p=1.0, num_output_channels=1)(image=plate_image_np)['image']
+    print(plate_image_np.shape)
     super_resolved = sr.upsample(plate_image_np)
     augmented = A.Compose([
-        A.CLAHE(clip_limit=2.0, tile_grid_size=(8, 8), p=1.0),
+        A.CLAHE(clip_limit=2, tile_grid_size=(1, 1), p=1.0),
+        A.Morphological(p=1.0, scale=(4, 4), operation="erosion"),
     ])(image=super_resolved)['image']
-
-    # MIGHT BE USEFUL
-    # if len(augmented.shape) == 2:  # если изображение черно-белое
-    #     augmented = cv2.cvtColor(augmented, cv2.COLOR_GRAY2BGR)
-    # augmented = cv2.fastNlMeansDenoisingColored(augmented, None, 5, 1, 7, 21)
 
     super_resolved_pil = np_to_pil(augmented)
     return super_resolved_pil

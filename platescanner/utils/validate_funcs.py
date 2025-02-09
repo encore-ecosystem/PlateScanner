@@ -1,12 +1,14 @@
-from platescanner import TEMP_FOLDER
+import shutil
+
+from platescanner import TEMP_FOLDER, PROJECT_ROOT_PATH
 from platescanner.model import YoloBase
 from pathlib import Path
 from platescanner.bbox import *
 from tqdm import tqdm
 from nodeflow.builtin.variables import PathVariable
 from cvtk.utils.determinator import determine_dataset
-from cvtk.supported_datasets.yolo import YOLO_Dataset, yolo_writer
-from cvtk.supported_datasets.mvp import MVP_Dataset, MVP2YOLO_Adapter
+from cvtk.utils import autoconvert
+from cvtk.supported_datasets import YOLO_Dataset, MVP_Dataset, MVP2YOLO_Adapter
 
 
 def get_predicted_bboxes(dataset_path: Path, model: YoloBase, conf: float, use_pbar: bool = True) -> dict[str, list[Bbox]]:
@@ -18,17 +20,17 @@ def get_predicted_bboxes(dataset_path: Path, model: YoloBase, conf: float, use_p
         bboxes.update(predicted_bboxes)
     return bboxes
 
+
 def get_target_bboxes(dataset_path: Path) -> dict[str, list[Bbox]]:
-    dataset = determine_dataset(dataset_path)
-    if isinstance(dataset, YOLO_Dataset):
-        return get_target_bboxes_yolo(dataset_path)
-    elif isinstance(dataset, MVP_Dataset):
-        yolo_dataset = MVP2YOLO_Adapter().compute(dataset)
-        temp = PathVariable(TEMP_FOLDER)
-        yolo_writer(yolo_dataset, PathVariable(TEMP_FOLDER))
-        return get_target_bboxes_yolo(temp.value)
-    else:
-        raise TypeError("Unsupported dataset type.")
+    if not isinstance(determine_dataset(dataset_path), YOLO_Dataset):
+        dataset: YOLO_Dataset = autoconvert(dataset_path, YOLO_Dataset)
+        dataset_path = TEMP_FOLDER / f"{dataset_path.name}_temp"
+        if dataset_path.exists():
+            shutil.rmtree(dataset_path)
+        dataset_path.mkdir(parents=True, exist_ok=True)
+        dataset.write(dataset_path)
+
+    return get_target_bboxes_yolo(dataset_path)
 
 
 def get_target_bboxes_yolo(dataset_path: Path) -> dict[str, list[Bbox]]:

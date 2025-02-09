@@ -7,6 +7,9 @@ from PIL import Image
 from platescanner.bbox import Bbox_2xy
 from pathlib import Path
 
+import albumentations
+import numpy as np
+
 
 class Yolo(YoloBase):
 
@@ -36,7 +39,7 @@ class Yolo(YoloBase):
         # area filter
         bboxes = bbox_to_total_area_filter(
             bboxes=bboxes,
-            area_threshold=kwargs.get('area_threshold', 0.01),
+            area_threshold=kwargs.get('area_threshold', float("inf")),
         )
 
         # nms filter

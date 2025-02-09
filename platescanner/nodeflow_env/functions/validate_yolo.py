@@ -1,6 +1,5 @@
 import shutil
 
-from cvtk import yolo_writer
 from nodeflow.builtin import PathVariable, Boolean, Result, Integer
 from ultralytics import YOLO
 from clearml import Task
@@ -19,7 +18,7 @@ def validate_yolo(model_path: PathVariable, dataset_path: PathVariable, imgsz: I
         dataset = cvtk.autoconvert(dataset_path.value, cvtk.YOLO_Dataset)
         dataset_path = PROJECT_ROOT_PATH / 'temp' / dataset_path.value.name
         dataset_path.mkdir(parents=True, exist_ok=True)
-        yolo_writer(dataset, dataset_path)
+        dataset.write(dataset_path)
 
     config = {
         "batch"       : 1,

@@ -1,14 +1,13 @@
-from paddleocr import PaddleOCR
-
 from platescanner import DEFAULT_CONFIDENCE_LEVEL
 from platescanner.model import Yolo, YoloOBB
 from platescanner.utils import handle_path, handle_confidence_level, draw_bbox, \
-    preprocess_license_plate
+    preprocess_license_plate, RecognitionModel
 
 from tqdm import tqdm
 from PIL import Image
 
 import matplotlib.pyplot as plt
+import re
 from platescanner.utils.draw_bbox import draw_bbox
 
 
@@ -78,14 +77,14 @@ def run(config: dict):
     # Computation
     model_path = config['-weights_path']
     model = (YoloOBB if 'obb' in model_path.stem else Yolo)(model_path)
-
+    rec_model = RecognitionModel()
     for img_abs_path in tqdm(list((input_path / 'test' / 'images').glob("*")), desc="Prediction"):
         curr_bboxes = model.predict(
             source=img_abs_path.__str__(),
             conf=confidence_level,
             line_width=None,
         )
-
+        print(curr_bboxes)
         image = Image.open(img_abs_path)
         width, height = image.size
 
@@ -96,36 +95,25 @@ def run(config: dict):
 
         for idx, bbox in enumerate(curr_bboxes[img_abs_path.stem]):
             plate_image = bbox.crop_on(image)
-            aligned = align_license_plate(plate_image)
+            preprocessed_plate = preprocess_license_plate(plate_image)
+            recognized_text, raw_output = rec_model.__call__("parseq", preprocessed_plate)
 
-            preprocessed_plate = preprocess_license_plate(aligned)
-            ocr = PaddleOCR(
-                use_angle_cls=True,
-                lang='en',
-                det_db_box_thresh=0.4,
-                rec_algorithm='SVTR_LCNet',
-                use_space_char=False,
-            )
-
-            text = "NOT RECOGNIZED"
-            try:
-                # Используем cls=True для лучшего распознавания
-                result = ocr.ocr(preprocessed_plate, cls=True)
-                if result and result[0]:
-                    text = "".join([line[1][0] for line in result[0]])
-                else:
-                    preprocessed_plate = preprocess_license_plate_without_aug(aligned)
-                    result = ocr.ocr(preprocessed_plate, cls=True)
-                    if result and result[0]:
-                        text = "".join([line[1][0] for line in result[0]])
-            except IndexError:
-                pass
+            if recognized_text and len(recognized_text) > 5:
+                recognized_text = re.sub(r"[^A-Za-z0-9]", "", recognized_text).upper()
+                recognized_text = re.sub(r'V', 'Y', recognized_text)
+                recognized_text = recognized_text.replace('I', '')
+                if recognized_text[0] == "8":
+                    recognized_text = recognized_text.replace("8", "В", 1)
+                elif recognized_text[0] == "0":
+                    recognized_text = recognized_text.replace("0", "O", 1)
+                if len(recognized_text) >= 9:
+                    recognized_text = recognized_text[:9]
 
             draw_bbox(
-                axs  = axs,
-                bbox = bbox.to_image_scale(width, height),
-                text = text,
-            )
+                    axs  = axs,
+                    bbox = bbox.to_image_scale(width, height),
+                    text = recognized_text,
+                )
 
         plt.savefig(output_path / f"{img_abs_path.stem}.png", dpi=300)
         plt.close(fig)

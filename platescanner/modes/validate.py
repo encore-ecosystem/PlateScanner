@@ -157,12 +157,10 @@ def overall_pipeline(config: dict):
             for idx, bbox in enumerate(filtered_predicted_bboxes[image_stem]):
                 plate_image = bbox[0].crop_on(image)
                 preprocessed_plate = preprocess_license_plate(plate_image)
-
+                preprocessed_plate.save(output_path / f"{image_stem}____{idx}.png")
                 recognized_text, raw_output = rec_model.__call__("parseq", preprocessed_plate)
 
                 if recognized_text and len(recognized_text) > 5:
-                    if len(recognized_text) >= 9:
-                        recognized_text = recognized_text[:9]
                     recognized_text = re.sub(r"[^A-Za-z0-9]", "", recognized_text).upper()
                     recognized_text = re.sub(r'V', 'Y', recognized_text)
                     recognized_text = recognized_text.replace('I', '')
@@ -170,6 +168,8 @@ def overall_pipeline(config: dict):
                         recognized_text = recognized_text.replace("8", "В", 1)
                     elif recognized_text[0] == "0":
                         recognized_text = recognized_text.replace("0", "O", 1)
+                    if len(recognized_text) >= 9:
+                        recognized_text = recognized_text[:9]
 
                 recognized_text_all_images[image_stem] = recognized_text_all_images.get(image_stem, []) + [(bbox[0], recognized_text)]
 
@@ -218,7 +218,6 @@ def detect_bboxes(config: dict):
 
     original_bboxes = get_target_bboxes(input_path)
     predicted_bboxes = get_predicted_bboxes(input_path, model, confidence_level)
-
     with open(PROJECT_ROOT_PATH / 'pretrained_validator.pickle', 'rb') as f:
         v: Validator = pickle.load(f)
     v.fit_distance(input_path, original_bboxes)

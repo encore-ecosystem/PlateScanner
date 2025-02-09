@@ -43,7 +43,7 @@ class YoloOBB(YoloBase):
         # area filter
         bboxes = bbox_to_total_area_filter(
                 bboxes=bboxes,
-                area_threshold=kwargs.get('area_threshold', 0.05),
+                area_threshold=kwargs.get('area_threshold', float("inf")),
         )
 
         # nms filter
