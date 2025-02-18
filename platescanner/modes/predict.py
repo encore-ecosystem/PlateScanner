@@ -84,7 +84,6 @@ def run(config: dict):
             conf=confidence_level,
             line_width=None,
         )
-        print(curr_bboxes)
         image = Image.open(img_abs_path)
         width, height = image.size
 

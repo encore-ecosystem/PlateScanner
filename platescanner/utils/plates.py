@@ -19,7 +19,6 @@ def preprocess_license_plate(plate_image: Image):
     plate_image_np = pil_to_np(plate_image)
     if not(plate_image_np.ndim == 2 or plate_image_np.shape[-1] == 1):
         plate_image_np = A.ToGray(p=1.0, num_output_channels=1)(image=plate_image_np)['image']
-    print(plate_image_np.shape)
     super_resolved = sr.upsample(plate_image_np)
     augmented = A.Compose([
         A.CLAHE(clip_limit=2, tile_grid_size=(1, 1), p=1.0),

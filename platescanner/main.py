@@ -1,6 +1,7 @@
 from platescanner.modes import *
 
 
+
 def main():
     import sys
     args = sys.argv
