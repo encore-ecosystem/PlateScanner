@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "platescanner"
-version = "0.3.0"
+version = "0.4.0"
 description = ""
 authors = [
     "Maksim Shushkevich <m.e.shushkevich@yandex.com>",
@@ -17,8 +17,8 @@ albumentations = "^1.4.10"
 nodeflow = "0.1.1"
 pycocotools = "^2.0.8"
 shapely = "^2.0.6"
-torch = {version = "^2.6.0+cu124", source = "pytorch-gpu"}
-torchvision = {version = "^0.21.0+cu124", source = "pytorch-gpu"}
+torch = {version = "==2.6.0+cu124", source = "pytorch-gpu"}
+torchvision = {version = "==0.21.0+cu124", source = "pytorch-gpu"}
 cvtk = { git = "https://github.com/encore-ecosystem/CVTK.git" }
 levenshtein = "^0.26.1"
 pytorch-lightning = "^2.5.0.post0"
