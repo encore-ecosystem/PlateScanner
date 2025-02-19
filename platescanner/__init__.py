@@ -16,9 +16,9 @@ BBOX_TEXT_VERTICAL_SHIFT   = -20
 # ================
 # Constants
 # ================
-PLATESCANNER_ROOT_PATH   = os.getenv("PROJECT_ROOT_PATH")
+PLATESCANNER_ROOT_PATH   = os.getenv("PLATESCANNER_ROOT_PATH")
 if PLATESCANNER_ROOT_PATH is None:
-    raise ValueError("PROJECT_ROOT_PATH must be set")
+    raise ValueError("PLATESCANNER_ROOT_PATH must be set")
 MODEL_PATH_FOLDER   = PLATESCANNER_ROOT_PATH / "models"
 CALIBRATION_DATASET = PLATESCANNER_ROOT_PATH / "calibration"
 FSR_MODEL_PATH      = MODEL_PATH_FOLDER / "FSR" / "FSRCNN_x4.pb"
