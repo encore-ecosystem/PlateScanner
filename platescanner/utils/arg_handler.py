@@ -1,6 +1,6 @@
 import os
 
-from platescanner import PROJECT_ROOT_PATH
+from platescanner import PLATESCANNER_ROOT_PATH
 from pathlib import Path
 
 

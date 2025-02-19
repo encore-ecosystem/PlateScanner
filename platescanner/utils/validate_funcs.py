@@ -1,6 +1,6 @@
 import shutil
 
-from platescanner import TEMP_FOLDER, PROJECT_ROOT_PATH
+from platescanner import TEMP_FOLDER, PLATESCANNER_ROOT_PATH
 from platescanner.model import YoloBase
 from pathlib import Path
 from platescanner.bbox import *

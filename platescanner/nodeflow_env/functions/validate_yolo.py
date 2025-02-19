@@ -6,7 +6,7 @@ from clearml import Task
 from pathlib import Path
 import cvtk
 
-from platescanner import PROJECT_ROOT_PATH
+from platescanner import PLATESCANNER_ROOT_PATH
 
 
 def validate_yolo(model_path: PathVariable, dataset_path: PathVariable, imgsz: Integer, use_clearml: Boolean) -> Result:
@@ -16,7 +16,7 @@ def validate_yolo(model_path: PathVariable, dataset_path: PathVariable, imgsz: I
     if not isinstance(dataset, cvtk.YOLO_Dataset):
         use_temp = True
         dataset = cvtk.autoconvert(dataset_path.value, cvtk.YOLO_Dataset)
-        dataset_path = PROJECT_ROOT_PATH / 'temp' / dataset_path.value.name
+        dataset_path = PLATESCANNER_ROOT_PATH / 'temp' / dataset_path.value.name
         dataset_path.mkdir(parents=True, exist_ok=True)
         dataset.write(dataset_path)
 

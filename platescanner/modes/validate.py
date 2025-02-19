@@ -6,7 +6,7 @@ from PIL import Image
 
 from platescanner.utils import get_target_bboxes, get_predicted_bboxes, handle_path, plot_conf_matrix, \
     preprocess_license_plate, RecognitionModel
-from platescanner import DEFAULT_CONFIDENCE_LEVEL, PROJECT_ROOT_PATH
+from platescanner import DEFAULT_CONFIDENCE_LEVEL, PLATESCANNER_ROOT_PATH
 from platescanner.model import Yolo, YoloOBB
 from matplotlib import pyplot as plt
 from pathlib import Path
@@ -218,7 +218,7 @@ def detect_bboxes(config: dict):
 
     original_bboxes = get_target_bboxes(input_path)
     predicted_bboxes = get_predicted_bboxes(input_path, model, confidence_level)
-    with open(PROJECT_ROOT_PATH / 'pretrained_validator.pickle', 'rb') as f:
+    with open(PLATESCANNER_ROOT_PATH / 'pretrained_validator.pickle', 'rb') as f:
         v: Validator = pickle.load(f)
     v.fit_distance(input_path, original_bboxes)
 

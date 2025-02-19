@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 import warnings
 warnings.filterwarnings("ignore")
@@ -15,8 +16,10 @@ BBOX_TEXT_VERTICAL_SHIFT   = -20
 # ================
 # Constants
 # ================
-PROJECT_ROOT_PATH   = Path(__file__).parent.parent.resolve()
-MODEL_PATH_FOLDER   = PROJECT_ROOT_PATH / "models"
-CALIBRATION_DATASET = PROJECT_ROOT_PATH / "calibration"
+PLATESCANNER_ROOT_PATH   = os.getenv("PROJECT_ROOT_PATH")
+if PLATESCANNER_ROOT_PATH is None:
+    raise ValueError("PROJECT_ROOT_PATH must be set")
+MODEL_PATH_FOLDER   = PLATESCANNER_ROOT_PATH / "models"
+CALIBRATION_DATASET = PLATESCANNER_ROOT_PATH / "calibration"
 FSR_MODEL_PATH      = MODEL_PATH_FOLDER / "FSR" / "FSRCNN_x4.pb"
-TEMP_FOLDER = PROJECT_ROOT_PATH / "TEMP"
+TEMP_FOLDER = PLATESCANNER_ROOT_PATH / "TEMP"
