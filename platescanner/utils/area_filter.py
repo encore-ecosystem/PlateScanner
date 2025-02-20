@@ -1,4 +1,4 @@
-from platescanner.bbox.abstract import Bbox
+from cvtk.bbox import Bbox
 
 
 def bbox_to_total_area_filter(bboxes: list[Bbox], area_threshold: float) -> list[Bbox]:

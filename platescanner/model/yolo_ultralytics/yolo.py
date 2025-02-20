@@ -4,11 +4,8 @@ from platescanner.utils import bbox_to_total_area_filter, nms
 from .abstract import YoloBase
 from ultralytics import YOLO
 from PIL import Image
-from platescanner.bbox import Bbox_2xy
+from cvtk.bbox import Bbox_2xy
 from pathlib import Path
-
-import albumentations
-import numpy as np
 
 
 class Yolo(YoloBase):

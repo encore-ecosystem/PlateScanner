@@ -1,4 +1,4 @@
-from platescanner.bbox.abstract import Bbox
+from cvtk.bbox import Bbox
 
 
 def bbox_iou(bbox_A: Bbox, bbox_B: Bbox) -> float:

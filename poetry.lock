@@ -457,10 +457,10 @@ test-no-images = ["pytest", "pytest-cov", "pytest-rerunfailures", "pytest-xdist"
 
 [[package]]
 name = "cvtk"
-version = "0.2.0"
+version = "0.2.1"
 description = ""
 optional = false
-python-versions = "^3.10"
+python-versions = ">=3.10, <4.0"
 groups = ["main"]
 files = []
 develop = false
@@ -477,7 +477,7 @@ tqdm = "^4.66.6"
 type = "git"
 url = "https://github.com/encore-ecosystem/CVTK.git"
 reference = "HEAD"
-resolved_reference = "4d38417f123058b2e4ac5bacba55ef57be7fdce4"
+resolved_reference = "c0ce31179aa09ab045b8a47dfa2c2f9a90cd7bd0"
 
 [[package]]
 name = "cycler"

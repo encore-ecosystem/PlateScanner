@@ -1,14 +1,10 @@
 from platescanner import DEFAULT_CONFIDENCE_LEVEL
 from platescanner.model import Yolo, YoloOBB
-from platescanner.utils import handle_path, handle_confidence_level, draw_bbox, \
-    preprocess_license_plate, RecognitionModel
+from platescanner.utils import handle_path, handle_confidence_level, preprocess_license_plate, RecognitionModel
+from platescanner.utils.draw_bbox import put_info_on_image
 
 from tqdm import tqdm
 from PIL import Image
-
-import matplotlib.pyplot as plt
-import re
-from platescanner.utils.draw_bbox import draw_bbox
 
 
 def mode(args):
@@ -17,7 +13,7 @@ def mode(args):
         '-weights_path'     : None,
         '-output_path'      : None,
         '-confidence_level' : DEFAULT_CONFIDENCE_LEVEL,
-        '-detection_only'   : False,
+        '-detection_only'   : None,
     }
 
     # parse args
@@ -77,45 +73,30 @@ def run(config: dict):
     # Computation
     model_path = config['-weights_path']
     model = (YoloOBB if 'obb' in model_path.stem else Yolo)(model_path)
+
     rec_model = RecognitionModel()
+
     for img_abs_path in tqdm(list((input_path / 'test' / 'images').glob("*")), desc="Prediction"):
+        image = Image.open(img_abs_path)
+
         curr_bboxes = model.predict(
             source=img_abs_path.__str__(),
             conf=confidence_level,
             line_width=None,
         )
-        image = Image.open(img_abs_path)
-        width, height = image.size
 
-        fig, axs = plt.subplots()
-        axs.imshow(image, cmap='gray')
-        axs.axis('off')
-        fig.patch.set_visible(False)
+        for bboxes in curr_bboxes[img_abs_path.stem]:
+            data = []
+            for bbox in bboxes:
+                if config['-detection_only']:
+                    text = f"{bbox.confidence}"
+                else:
+                    plate_image = bbox.crop_on(image)
+                    preprocessed_plate = preprocess_license_plate(plate_image)
+                    text, _ = rec_model("parseq", preprocessed_plate)
 
-        for idx, bbox in enumerate(curr_bboxes[img_abs_path.stem]):
-            plate_image = bbox.crop_on(image)
-            preprocessed_plate = preprocess_license_plate(plate_image)
-            recognized_text, raw_output = rec_model.__call__("parseq", preprocessed_plate)
-
-            if recognized_text and len(recognized_text) > 5:
-                recognized_text = re.sub(r"[^A-Za-z0-9]", "", recognized_text).upper()
-                recognized_text = re.sub(r'V', 'Y', recognized_text)
-                recognized_text = recognized_text.replace('I', '')
-                if recognized_text[0] == "8":
-                    recognized_text = recognized_text.replace("8", "В", 1)
-                elif recognized_text[0] == "0":
-                    recognized_text = recognized_text.replace("0", "O", 1)
-                if len(recognized_text) >= 9:
-                    recognized_text = recognized_text[:9]
-
-            draw_bbox(
-                    axs  = axs,
-                    bbox = bbox.to_image_scale(width, height),
-                    text = recognized_text,
-                )
-
-        plt.savefig(output_path / f"{img_abs_path.stem}.png", dpi=300)
-        plt.close(fig)
+                data.append((bbox, text))
+            put_info_on_image(image, img_abs_path.stem, output_path, data)
 
 
 __all__ = [
