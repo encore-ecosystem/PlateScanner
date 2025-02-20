@@ -1,7 +1,6 @@
-import re
-
 from typing import Optional
 
+import cvtk
 from PIL import Image
 
 from platescanner.utils import get_target_bboxes, get_predicted_bboxes, handle_path, plot_conf_matrix, \
@@ -29,7 +28,7 @@ def mode(args):
         '-output_path'      : None,
         '-weights_path'     : None,
         '-confidence_level' : DEFAULT_CONFIDENCE_LEVEL,
-        '-detection_only'   : False,
+        '-detection_only'   : None,
     }
 
     # parse args
@@ -92,6 +91,8 @@ def run(config: dict):
         case True:
             only_detection(config)
         case False:
+            only_recognition(config)
+        case None:
             overall_pipeline(config)
 
 
@@ -160,17 +161,6 @@ def overall_pipeline(config: dict):
                 preprocessed_plate.save(output_path / f"{image_stem}____{idx}.png")
                 recognized_text, raw_output = rec_model.__call__("parseq", preprocessed_plate)
 
-                if recognized_text and len(recognized_text) > 5:
-                    recognized_text = re.sub(r"[^A-Za-z0-9]", "", recognized_text).upper()
-                    recognized_text = re.sub(r'V', 'Y', recognized_text)
-                    recognized_text = recognized_text.replace('I', '')
-                    if recognized_text[0] == "8":
-                        recognized_text = recognized_text.replace("8", "В", 1)
-                    elif recognized_text[0] == "0":
-                        recognized_text = recognized_text.replace("0", "O", 1)
-                    if len(recognized_text) >= 9:
-                        recognized_text = recognized_text[:9]
-
                 recognized_text_all_images[image_stem] = recognized_text_all_images.get(image_stem, []) + [(bbox[0], recognized_text)]
 
                 draw_bbox(
@@ -206,6 +196,72 @@ def overall_pipeline(config: dict):
         print('\n')
         print(sum(lev_scores.values()) / len(lev_scores.values()))
         print(sum(business_scores.values()) / len(business_scores.values()))
+
+def only_recognition(config: dict):
+    input_path  = Path(config['-dataset_path'])
+    output_path = Path(config['-output_path'])
+
+    # 0. Convert to MVP
+    recognized_text_all_images = {}
+    ground_truth_text_all_images = {}
+
+    # 1. get target bboxes
+    mvp_dataset = cvtk.MVP_Dataset.read(input_path)
+    valid_split = 'valid'
+    curr_bboxes = {}
+    rec_model = RecognitionModel()
+    for image_stem in mvp_dataset.attributes[valid_split]:
+        curr_bboxes[image_stem] = []
+        for bbox_data in mvp_dataset.attributes[valid_split][image_stem]['Detection']['bboxes']:
+            bbox_type   = bbox_data['bbox_type']
+            bbox_points = bbox_data['points']
+            bbox_text   = bbox_data['recognition_text']
+
+            bbox = None
+            match bbox_type:
+                case "bb":
+                    bbox = cvtk.Bbox_CWH(bbox_points)
+
+            if bbox is None:
+                raise ValueError(f"Bbox type {bbox_type} not supported yet")
+
+            curr_bboxes[image_stem].append((bbox, bbox_text))
+
+        image = Image.open((input_path / 'valid' / 'images').glob(f"{image_stem}.*").__next__())
+        width, height = image.size
+        fig, axs = plt.subplots()
+        axs.imshow(image, cmap='gray')
+        axs.axis('off')
+        fig.patch.set_visible(False)
+
+        for idx, (bbox, bbox_text) in enumerate(curr_bboxes[image_stem]):
+            plate_image = bbox.crop_on(image)
+            preprocessed_plate = preprocess_license_plate(plate_image)
+            recognized_text, raw_output = rec_model("parseq", preprocessed_plate)
+            ground_truth_text_all_images[image_stem] = ground_truth_text_all_images.get(image_stem, []) + [(bbox, bbox_text)]
+            recognized_text_all_images[image_stem] = recognized_text_all_images.get(image_stem, []) + [(bbox, recognized_text)]
+
+            draw_bbox(
+                axs=axs,
+                bbox=bbox.to_image_scale(width, height),
+                text=f"R: {recognized_text} | E: {bbox_text}",
+                text_h_shift=int(-0.05 * width),
+                text_v_shift=int(-0.01 * height),
+                text_color='green',
+                edge_color='green',
+            )
+        # SAVE IMAGES WITH RECOGNIZED TEXT
+        plt.savefig(output_path / f"{image_stem}.png", dpi=300)
+        plt.close(fig)
+
+    lev_scores, business_scores = evaluate_metrics(ground_truth_text_all_images, recognized_text_all_images)
+    print('\n\n')
+    print(lev_scores)
+    print(business_scores)
+    print('\n')
+    print(sum(lev_scores.values()) / len(lev_scores.values()))
+    print(sum(business_scores.values()) / len(business_scores.values()))
+
 
 def detect_bboxes(config: dict):
     # run
@@ -280,6 +336,7 @@ def detect_bboxes(config: dict):
         images_samples = list(original_bboxes.keys())[:num]
 
         yield filtered_predicted_bboxes, filtered_original_bboxes, images_samples
+
 
 def add_rec_text_to_bboxes(bboxes_without_text: dict, bboxes_with_text: Optional[dict]) -> dict:
     if bboxes_with_text is None:

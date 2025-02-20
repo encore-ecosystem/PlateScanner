@@ -1,14 +1,13 @@
 import shutil
 
-from platescanner import TEMP_FOLDER, PROJECT_ROOT_PATH
+from platescanner import TEMP_FOLDER
 from platescanner.model import YoloBase
 from pathlib import Path
-from platescanner.bbox import *
+from cvtk.bbox import *
 from tqdm import tqdm
-from nodeflow.builtin.variables import PathVariable
 from cvtk.utils.determinator import determine_dataset
 from cvtk.utils import autoconvert
-from cvtk.supported_datasets import YOLO_Dataset, MVP_Dataset, MVP2YOLO_Adapter
+from cvtk.supported_datasets import YOLO_Dataset
 
 
 def get_predicted_bboxes(dataset_path: Path, model: YoloBase, conf: float, use_pbar: bool = True) -> dict[str, list[Bbox]]:

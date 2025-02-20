@@ -6,6 +6,7 @@ from PIL import Image
 import albumentations as A
 import numpy as np
 import cv2
+import re
 
 from platescanner import FSR_MODEL_PATH
 
@@ -40,7 +41,7 @@ class RecognitionModel:
             T.Normalize(0.5, 0.5)
         ])
 
-    def _get_model(self, name):
+    def _get_model(self, name: str):
         if name in self._model_cache:
             return self._model_cache[name]
         model = torch.hub.load('baudm/parseq', name, pretrained=True).eval().to(self.device)
@@ -48,19 +49,37 @@ class RecognitionModel:
         return model
 
     @torch.inference_mode()
-    def __call__(self, model_name, image):
-        if image is None:
-            return '', []
+    def __call__(self, model_name: str, image: Image) -> tuple[str, list]:
         model = self._get_model(model_name)
         image = self._preprocess(image.convert('RGB')).unsqueeze(0).to(self.device)
+
         # Greedy decoding
         pred = model(image).softmax(-1)
         label, _ = model.tokenizer.decode(pred)
         raw_label, raw_confidence = model.tokenizer.decode(pred, raw=True)
+
         # Format confidence values
         max_len = 25 if model_name == 'crnn' else len(label[0]) + 1
         conf = list(map('{:0.1f}'.format, raw_confidence[0][:max_len].tolist()))
-        return label[0], [raw_label[0][:max_len], conf]
+
+        recognized_text = label[0]
+        if recognized_text and len(recognized_text) > 5:
+            recognized_text = self.process_text(recognized_text)
+
+        return recognized_text, [raw_label[0][:max_len], conf]
+
+    @staticmethod
+    def process_text(recognized_text: str) -> str:
+        recognized_text = re.sub(r"[^A-Za-z0-9]", "", recognized_text).upper()
+        recognized_text = re.sub(r'V', 'Y', recognized_text)
+        recognized_text = recognized_text.replace('I', '')
+        if recognized_text[0] == "8":
+            recognized_text = recognized_text.replace("8", "В", 1)
+        elif recognized_text[0] == "0":
+            recognized_text = recognized_text.replace("0", "O", 1)
+        if len(recognized_text) >= 9:
+            recognized_text = recognized_text[:9]
+        return recognized_text
 
 def pil_to_np(image):
     return np.array(image)

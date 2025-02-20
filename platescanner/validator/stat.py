@@ -1,4 +1,4 @@
-from platescanner.bbox.abstract import Bbox
+from cvtk import Bbox
 from platescanner.validator.criteria import CustomCriteria, Time, Distance
 from platescanner.utils import bbox_iou
 
