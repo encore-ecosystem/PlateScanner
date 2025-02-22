@@ -101,7 +101,7 @@ def only_detection(config: dict):
     input_path = Path(config['-dataset_path'])
     output_path = Path(config['-output_path'])
 
-    for filtered_predicted_bboxes, filtered_original_bboxes, images_samples in detect_bboxes(config):
+    for filtered_predicted_bboxes, filtered_original_bboxes, images_samples, _ in detect_bboxes(config):
         for image_stem in tqdm(images_samples, desc="Saving validation images"):
             image = Image.open((input_path / 'valid' / 'images').glob(f'{image_stem}.*').__next__())
             width, height = image.size
@@ -144,7 +144,7 @@ def overall_pipeline(config: dict):
     ground_truth_text_all_images = {}
 
     rec_model = RecognitionModel()
-    for filtered_predicted_bboxes, filtered_original_bboxes, images_samples in detect_bboxes(config):
+    for filtered_predicted_bboxes, filtered_original_bboxes, images_samples, fn in detect_bboxes(config):
         for image_stem in tqdm(images_samples, desc="Processing images with recognition"):
             img_abs_path = (input_path / 'valid' / 'images').glob(f"{image_stem}.*").__next__()
             image = Image.open(img_abs_path)
@@ -158,8 +158,7 @@ def overall_pipeline(config: dict):
             for idx, bbox in enumerate(filtered_predicted_bboxes[image_stem]):
                 plate_image = bbox[0].crop_on(image)
                 preprocessed_plate = preprocess_license_plate(plate_image)
-                preprocessed_plate.save(output_path / f"{image_stem}____{idx}.png")
-                recognized_text, raw_output = rec_model.__call__("parseq", preprocessed_plate)
+                recognized_text, raw_output = rec_model("parseq", preprocessed_plate)
 
                 recognized_text_all_images[image_stem] = recognized_text_all_images.get(image_stem, []) + [(bbox[0], recognized_text)]
 
@@ -189,13 +188,13 @@ def overall_pipeline(config: dict):
             plt.savefig(output_path / f"{image_stem}.png", dpi=300)
             plt.close(fig)
 
-        lev_scores, business_scores = evaluate_metrics(ground_truth_text_all_images, recognized_text_all_images)
-        print('\n\n')
-        print(lev_scores)
-        print(business_scores)
-        print('\n')
-        print(sum(lev_scores.values()) / len(lev_scores.values()))
-        print(sum(business_scores.values()) / len(business_scores.values()))
+
+        _, business_scores = evaluate_metrics(ground_truth_text_all_images, recognized_text_all_images)
+        n = 0
+        for x in filtered_original_bboxes.values():
+            n += len(x)
+        print(f"Business score: {sum(business_scores.values()) / n:.4f}")
+
 
 def only_recognition(config: dict):
     input_path  = Path(config['-dataset_path'])
@@ -336,7 +335,7 @@ def detect_bboxes(config: dict):
             break
         images_samples = list(original_bboxes.keys())[:num]
 
-        yield filtered_predicted_bboxes, filtered_original_bboxes, images_samples
+        yield filtered_predicted_bboxes, filtered_original_bboxes, images_samples, FN
 
 
 def add_rec_text_to_bboxes(bboxes_without_text: dict, bboxes_with_text: Optional[dict]) -> dict:
