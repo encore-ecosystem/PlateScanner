@@ -63,7 +63,7 @@ class RecognitionModel:
         conf = list(map('{:0.1f}'.format, raw_confidence[0][:max_len].tolist()))
 
         recognized_text = label[0]
-        if recognized_text and len(recognized_text) > 5:
+        if recognized_text:
             recognized_text = self.process_text(recognized_text)
 
         return recognized_text, [raw_label[0][:max_len], conf]
@@ -73,13 +73,44 @@ class RecognitionModel:
         recognized_text = re.sub(r"[^A-Za-z0-9]", "", recognized_text).upper()
         recognized_text = re.sub(r'V', 'Y', recognized_text)
         recognized_text = recognized_text.replace('I', '')
-        if recognized_text[0] == "8":
-            recognized_text = recognized_text.replace("8", "В", 1)
-        elif recognized_text[0] == "0":
-            recognized_text = recognized_text.replace("0", "O", 1)
+        recognized_text = recognized_text.replace('R', 'B')
+        recognized_text = recognized_text.replace('G', 'C')
+        recognized_text = recognized_text.replace('F', 'A')
+        recognized_text = recognized_text.replace('D', 'O')
+        recognized_text = recognized_text.replace('S', '5')
+        recognized_text = recognized_text.replace('Z', '2')
+        recognized_text = list(recognized_text)
+        match recognized_text[0]:
+            case "8":
+                recognized_text[0] = "B"
+            case "0":
+                recognized_text[0] = "O"
+            case "7":
+                recognized_text[0] = "T"
+        for i in range(1, 4):
+            if i >= len(recognized_text):
+                break
+            match recognized_text[i]:
+                case "B":
+                    recognized_text[i] = "8"
+                case "O":
+                    recognized_text[i] = "0"
+                case "T":
+                    recognized_text[i] = "7"
+        for i in range(4, 6):
+            if i >= len(recognized_text):
+                break
+            match recognized_text[i]:
+                case "8":
+                    recognized_text[i] = "B"
+                case "0":
+                    recognized_text[i] = "O"
+                case "7":
+                    recognized_text[i] = "T"
+        recognized_text = "".join(recognized_text)
         if len(recognized_text) >= 9:
             recognized_text = recognized_text[:9]
-        return recognized_text
+        return recognized_text.strip()
 
 def pil_to_np(image):
     return np.array(image)

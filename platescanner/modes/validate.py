@@ -240,6 +240,7 @@ def only_recognition(config: dict):
             recognized_text, raw_output = rec_model("parseq", preprocessed_plate)
             ground_truth_text_all_images[image_stem] = ground_truth_text_all_images.get(image_stem, []) + [(bbox, bbox_text)]
             recognized_text_all_images[image_stem] = recognized_text_all_images.get(image_stem, []) + [(bbox, recognized_text)]
+            color = 'green' if recognized_text == bbox_text else 'red'
 
             draw_bbox(
                 axs=axs,
@@ -247,8 +248,8 @@ def only_recognition(config: dict):
                 text=f"R: {recognized_text} | E: {bbox_text}",
                 text_h_shift=int(-0.05 * width),
                 text_v_shift=int(-0.01 * height),
-                text_color='green',
-                edge_color='green',
+                text_color=color,
+                edge_color=color,
             )
         # SAVE IMAGES WITH RECOGNIZED TEXT
         plt.savefig(output_path / f"{image_stem}.png", dpi=300)
