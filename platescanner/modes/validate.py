@@ -197,7 +197,7 @@ def overall_pipeline(config: dict):
 
 
 def only_recognition(config: dict):
-    input_path  = Path(config['-dataset_path'])
+    input_path = Path(config['-dataset_path'])
     output_path = Path(config['-output_path'])
 
     # 0. Convert to MVP
@@ -212,9 +212,9 @@ def only_recognition(config: dict):
     for image_stem in mvp_dataset.attributes[valid_split]:
         curr_bboxes[image_stem] = []
         for bbox_data in mvp_dataset.attributes[valid_split][image_stem]['Detection']['bboxes']:
-            bbox_type   = bbox_data['bbox_type']
+            bbox_type = bbox_data['bbox_type']
             bbox_points = bbox_data['points']
-            bbox_text   = bbox_data['recognition_text']
+            bbox_text = bbox_data['text'] if 'text' in bbox_data else bbox_data['recognition_text']
 
             bbox = None
             match bbox_type:
@@ -237,8 +237,10 @@ def only_recognition(config: dict):
             plate_image = bbox.crop_on(image)
             preprocessed_plate = preprocess_license_plate(plate_image)
             recognized_text, raw_output = rec_model("parseq", preprocessed_plate)
-            ground_truth_text_all_images[image_stem] = ground_truth_text_all_images.get(image_stem, []) + [(bbox, bbox_text)]
-            recognized_text_all_images[image_stem] = recognized_text_all_images.get(image_stem, []) + [(bbox, recognized_text)]
+            ground_truth_text_all_images[image_stem] = ground_truth_text_all_images.get(image_stem, []) + [
+                (bbox, bbox_text)]
+            recognized_text_all_images[image_stem] = recognized_text_all_images.get(image_stem, []) + [
+                (bbox, recognized_text)]
             color = 'green' if recognized_text == bbox_text else 'red'
 
             draw_bbox(
@@ -255,13 +257,25 @@ def only_recognition(config: dict):
         plt.close(fig)
 
     lev_scores, business_scores = evaluate_metrics(ground_truth_text_all_images, recognized_text_all_images)
-    print('\n\n')
-    print(lev_scores)
-    print(business_scores)
-    print('\n')
-    print(sum(lev_scores.values()) / len(lev_scores.values()))
-    print(sum(business_scores.values()) / len(business_scores.values()))
 
+    total_gt_boxes = 0
+    valid_gt_boxes = 0
+    total_business_score = 0
+
+    for image_stem, gt_boxes in ground_truth_text_all_images.items():
+        for _, gt_text in gt_boxes:
+            total_gt_boxes += 1
+            if gt_text is not None:
+                valid_gt_boxes += 1
+
+    for image_stem, score in business_scores.items():
+        if ground_truth_text_all_images[image_stem][0][1] is not None:
+            total_business_score += score
+
+    # print("Levenshtein scores:", lev_scores)
+    # print("Business scores:", business_scores)
+    print(f"Mean Average Levenshtein: {sum(lev_scores.values()) / len(lev_scores.values()):.4f}")
+    print(f"Business score: {total_business_score / valid_gt_boxes:.4f}")
 
 def detect_bboxes(config: dict):
     # run
