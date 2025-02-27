@@ -1,6 +1,7 @@
 .idea
-runs
-dataset
-yolo11n.pt
-output
+/datasets
+/calibration
+/output
 __pycache__
+/TEMP
+.venv
