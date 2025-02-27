@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "platescanner"
-version = "0.4.0"
+version = "0.5.0"
 description = ""
 authors = [
     "Maksim Shushkevich <m.e.shushkevich@yandex.com>",

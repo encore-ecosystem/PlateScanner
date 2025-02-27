@@ -60,14 +60,6 @@ def mode(args):
                         exit(-1)
                 current += 1
 
-            case '-confidence_level':
-                confidence_level = args[current + 1]
-                if not confidence_level.isdigit() or not 0 <= int(confidence_level) <= 100:
-                    print("Invalid confidence level.")
-                    exit(-1)
-
-                config['-confidence_level'] = float(confidence_level) / 100
-                current += 1
 
             case _:
                 print(f"Unknown argument: {args[current]}")

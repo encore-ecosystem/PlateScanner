@@ -58,10 +58,14 @@ pip3 install .
 4. **Установите переменную окружения**, например:
 ```bash
 set PLATESCANNER_ROOT_PATH = "$PWD"
+=======
+```bash
+pip3 install .
 ```
 # Запуск приложения
 Чтобы посмотреть режимы работы приложения **PlateScanner**, используйте следующую команду:
 ```bash
+
 platescanner help
 ```
 
@@ -91,7 +95,9 @@ python main.py train --weights_path <path_to_weights> --dataset_path <path_to_da
  - **< augmentation >** : Аугментации, которые будут применяться в процессе тренировки, из библиотеки **Albumentations**.
 
 
+
 Для того, чтобы изменить такие параметры, как _batch_size_, _save_period_ и _resume_ тренировки, перейдите в скрипт _src/nodeflow_enf/functions/train_yolo.py_ :
+
 
 - **< batch >** :
     - При -1 batch подбирается автоматически.
@@ -105,7 +111,9 @@ python main.py train --weights_path <path_to_weights> --dataset_path <path_to_da
 - **< resume >** : При тренировке с последней сохранённой эпохи передайте параметр **resume=True** в _config_ файла. Укажите _last_ веса модели из _scripts/runs_ в _weights_path_ предыдущего пункта.
 
 
+
 Для того, чтобы изменить такие параметры, как _imgsz_ и _epochs_ тренировки, перейдите в скрипт _src/model/yolo_ultralytics/abstract.py_ , в функцию **fit** :
+
 
 - **< imgsz >** : Размер изображения, который подаётся на вход модели.
 
