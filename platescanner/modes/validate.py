@@ -189,11 +189,27 @@ def overall_pipeline(config: dict):
             plt.close(fig)
 
 
-        _, business_scores = evaluate_metrics(ground_truth_text_all_images, recognized_text_all_images)
+        lev_scores, business_scores = evaluate_metrics(ground_truth_text_all_images, recognized_text_all_images)
+
+        total_gt_boxes = 0
+        valid_gt_boxes = 0
+        total_business_score = 0
+
+        for image_stem, gt_boxes in ground_truth_text_all_images.items():
+            for _, gt_text in gt_boxes:
+                total_gt_boxes += 1
+                if gt_text is not None:
+                    valid_gt_boxes += 1
+
+        for image_stem, score in business_scores.items():
+            if ground_truth_text_all_images[image_stem][0][1] is not None:
+                total_business_score += score
+
         n = 0
         for x in filtered_original_bboxes.values():
             n += len(x)
-        print(f"Business score: {sum(business_scores.values()) / n:.4f}")
+        print(f"Business score: {total_business_score / valid_gt_boxes:.4f}")
+        print(f"Mean Average Levenshtein: {sum(lev_scores.values()) / len(lev_scores.values()):.4f}")
 
 
 def only_recognition(config: dict):
