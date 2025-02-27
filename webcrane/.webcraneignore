@@ -1,0 +1,13 @@
+.git
+.idea
+appendices
+models
+output
+platescanner
+webcrane
+.gitignore
+LICENCE
+poetry.lock
+pretrained_validator.pickle
+pyproject.toml
+README.md

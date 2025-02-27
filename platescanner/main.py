@@ -1,6 +1,5 @@
 from platescanner.modes import *
 
-
 def main():
     import sys
     args = sys.argv
@@ -28,28 +27,31 @@ def main():
 train:
     '-weights_path'     : None                      # path to model's weights file 
     '-dataset_path'     : None                      # path to dataset directory  
-    '-use-clearml'      : False                     # use clearml for training
+    '-use_clearml'      : False                     # use clearml for training
 
 predict:
-    '-weights-path'     : None                      # path to model's weights file
-    '-dataset-path'     : None                      # path to dataset directory
-    '-output-path'      : None                      # path to output directory (should exists and be empty)
-    '-confidence-level' : DEFAULT_CONFIDENCE_LEVEL  # confidence level
+    '-weights_path'     : None                      # path to model's weights file
+    '-dataset_path'     : None                      # path to dataset directory
+    '-output_path'      : None                      # path to output directory (should exists and be empty)
+    '-confidence_level' : DEFAULT_CONFIDENCE_LEVEL  # confidence level
+    '-detection_only'   : False                     # True - detection only; False - detection + recognition
 
 validate:
-    '-weights-path'     : None                      # path to model's weights file
-    '-dataset-path'     : None                      # path to dataset directory
-    '-output-path'      : None                      # path to output directory (should exists and be empty)
-    '-confidence-level' : DEFAULT_CONFIDENCE_LEVEL  # confidence level
+    '-weights_path'     : None                      # path to model's weights file
+    '-dataset_path'     : None                      # path to dataset directory
+    '-output_path'      : None                      # path to output directory (should exists and be empty)
+    '-confidence_level' : DEFAULT_CONFIDENCE_LEVEL  # confidence level
+    '-detection_only'   : None                      # None: detection + recognition; True - detection only; False - recognition
 
 find_confidence:
-    '-weights-path'     : None                      # path to model's weights file
-    '-dataset-path'     : None                      # path to dataset directory
+    '-weights_path'     : None                      # path to model's weights file
+    '-dataset_path'     : None                      # path to dataset directory
     '-iters'            : 7                         # number of iterations
-    '-target-precision' : 0.95                      # target precision
+    '-target_precision' : 0.95                      # target precision
 
 make_calibration_dataset:
-    '-dataset-path'     : None                      # path to dataset directory
+    '-dataset_path'     : None                      # path to dataset directory
+
 """)
         case _:
             print("Please, choose any valid mode")

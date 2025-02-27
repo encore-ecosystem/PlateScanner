@@ -1,7 +1,13 @@
+import shutil
+
+from platescanner import TEMP_FOLDER
 from platescanner.model import YoloBase
 from pathlib import Path
-from platescanner.bbox import *
+from cvtk.bbox import *
 from tqdm import tqdm
+from cvtk.utils.determinator import determine_dataset
+from cvtk.utils import autoconvert
+from cvtk.supported_datasets import YOLO_Dataset
 
 
 def get_predicted_bboxes(dataset_path: Path, model: YoloBase, conf: float, use_pbar: bool = True) -> dict[str, list[Bbox]]:
@@ -13,7 +19,20 @@ def get_predicted_bboxes(dataset_path: Path, model: YoloBase, conf: float, use_p
         bboxes.update(predicted_bboxes)
     return bboxes
 
+
 def get_target_bboxes(dataset_path: Path) -> dict[str, list[Bbox]]:
+    if not isinstance(determine_dataset(dataset_path), YOLO_Dataset):
+        dataset: YOLO_Dataset = autoconvert(dataset_path, YOLO_Dataset)
+        dataset_path = TEMP_FOLDER / f"{dataset_path.name}_temp"
+        if dataset_path.exists():
+            shutil.rmtree(dataset_path)
+        dataset_path.mkdir(parents=True, exist_ok=True)
+        dataset.write(dataset_path)
+
+    return get_target_bboxes_yolo(dataset_path)
+
+
+def get_target_bboxes_yolo(dataset_path: Path) -> dict[str, list[Bbox]]:
     bboxes = {}
     for label_name in tqdm(list((dataset_path / "valid" / "labels").glob("*.txt")), desc='Processing target bboxes'):
         with open(dataset_path / "valid" / "labels" / label_name, "r") as f:

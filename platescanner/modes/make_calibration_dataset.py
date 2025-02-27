@@ -1,6 +1,6 @@
 from platescanner.validator.stat import Validator
 from platescanner.utils import handle_path
-from platescanner import PROJECT_ROOT_PATH
+from platescanner import PLATESCANNER_ROOT_PATH
 
 import pickle
 
@@ -35,7 +35,7 @@ def mode(args):
     v = Validator()
     v.fit_brightness(config['-dataset_path'])
 
-    with open(PROJECT_ROOT_PATH / 'pretrained_validator.pickle', 'wb') as f:
+    with open(PLATESCANNER_ROOT_PATH / 'pretrained_validator.pickle', 'wb') as f:
         pickle.dump(v, f)
 
 

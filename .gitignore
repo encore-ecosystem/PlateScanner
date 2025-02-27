@@ -1,3 +1,7 @@
 .idea
 /datasets
 /calibration
+/output
+__pycache__
+/TEMP
+.venv

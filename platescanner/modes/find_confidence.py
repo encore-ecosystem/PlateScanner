@@ -5,7 +5,7 @@ from platescanner.model import YoloOBB, Yolo
 from platescanner.utils import handle_path
 from platescanner.validator.criteria import CustomCriteria
 from platescanner.validator.stat import Validator
-from platescanner import PROJECT_ROOT_PATH
+from platescanner import PLATESCANNER_ROOT_PATH
 from tqdm import tqdm
 
 
@@ -74,7 +74,7 @@ def mode(args):
 
     original_bboxes  = get_target_bboxes(input_path)
 
-    with open(PROJECT_ROOT_PATH / 'pretrained_validator.pickle', 'rb') as f:
+    with open(PLATESCANNER_ROOT_PATH / 'pretrained_validator.pickle', 'rb') as f:
         v : Validator = pickle.load(f)
     v.fit_distance(input_path, original_bboxes)
     classified_original_bboxes = v.predict(input_path, original_bboxes)

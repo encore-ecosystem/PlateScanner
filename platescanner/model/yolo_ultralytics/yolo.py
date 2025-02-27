@@ -4,7 +4,8 @@ from platescanner.utils import bbox_to_total_area_filter, nms
 from .abstract import YoloBase
 from ultralytics import YOLO
 from PIL import Image
-from platescanner.bbox import Bbox_2xy
+
+from cvtk.bbox import Bbox_2xy
 from pathlib import Path
 
 
@@ -36,7 +37,7 @@ class Yolo(YoloBase):
         # area filter
         bboxes = bbox_to_total_area_filter(
             bboxes=bboxes,
-            area_threshold=kwargs.get('area_threshold', 0.01),
+            area_threshold=kwargs.get('area_threshold', float("inf")),
         )
 
         # nms filter
