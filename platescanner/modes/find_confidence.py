@@ -1,7 +1,7 @@
 import pickle
 
 from platescanner.utils.validate_funcs import get_target_bboxes, get_predicted_bboxes
-from platescanner.model import YoloOBB, Yolo
+from platescanner.models import YoloOBB, Yolo
 from platescanner.utils import handle_path
 from platescanner.validator.criteria import CustomCriteria
 from platescanner.validator.stat import Validator

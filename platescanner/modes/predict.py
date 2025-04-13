@@ -1,5 +1,5 @@
 from platescanner import DEFAULT_CONFIDENCE_LEVEL
-from platescanner.model import Yolo, YoloOBB
+from platescanner.models import Yolo, YoloOBB
 from platescanner.utils import handle_path, handle_confidence_level, preprocess_license_plate, RecognitionModel
 from platescanner.utils.draw_bbox import put_info_on_image
 

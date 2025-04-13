@@ -1,1 +1,0 @@
-platescanner predict -weights_path "C:\Users\Kotto\Documents\Programming\PlateScanner\models\yolo11x.pt" -dataset_path "C:\Users\Kotto\Documents\Programming\PlateScanner\datasets\target_pictures" -output_path C:\Users\Kotto\Documents\Programming\PlateScanner\output

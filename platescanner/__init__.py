@@ -1,6 +1,6 @@
-import os
 from pathlib import Path
 import warnings
+import torch
 warnings.filterwarnings("ignore")
 
 # ================
@@ -16,11 +16,13 @@ BBOX_TEXT_VERTICAL_SHIFT   = -20
 # ================
 # Constants
 # ================
-PLATESCANNER_ROOT_PATH   = os.getenv("PLATESCANNER_ROOT_PATH")
-if PLATESCANNER_ROOT_PATH is None:
-    raise ValueError("PLATESCANNER_ROOT_PATH must be set")
-PLATESCANNER_ROOT_PATH = Path(PLATESCANNER_ROOT_PATH)
-MODEL_PATH_FOLDER   = PLATESCANNER_ROOT_PATH / "models"
-CALIBRATION_DATASET = PLATESCANNER_ROOT_PATH / "calibration"
-FSR_MODEL_PATH      = MODEL_PATH_FOLDER / "FSR" / "FSRCNN_x4.pb"
-TEMP_FOLDER = PLATESCANNER_ROOT_PATH / "TEMP"
+PLATESCANNER_ROOT_PATH = Path()
+EXPERIMENTATOR_PATH    = PLATESCANNER_ROOT_PATH / ".experimentator"
+DATASETS_PATH          = PLATESCANNER_ROOT_PATH / "datasets"
+MODELS_PATH            = PLATESCANNER_ROOT_PATH / "models"
+CALIBRATION_DATASET    = PLATESCANNER_ROOT_PATH / "calibration"
+TEMP_FOLDER            = PLATESCANNER_ROOT_PATH / "TEMP"
+TORCHHUB_PATH          = PLATESCANNER_ROOT_PATH / ".torchhub"
+
+#
+torch.hub.set_dir(TORCHHUB_PATH)

@@ -1,10 +1,10 @@
-from cvtk.bbox import Bbox
+from cvtk.interfaces import Bbox
 
 
-def bbox_iou(bbox_A: Bbox, bbox_B: Bbox) -> float:
-    inter_area = bbox_A & bbox_B
+def bbox_iou(bbox1: Bbox, bbox2: Bbox) -> float:
+    inter_area = bbox1 & bbox2
     try:
-        iou = inter_area / (bbox_A.area() + bbox_B.area() - inter_area)
+        iou = inter_area / (bbox1.area() + bbox2.area() - inter_area)
     except ZeroDivisionError:
         iou = 0
     return iou

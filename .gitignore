@@ -1,7 +1,7 @@
 .idea
-/datasets
-/calibration
-/output
+.venv
+.torchhub
 __pycache__
-/TEMP
-/ouyt
+datasets
+
+models/detector/yolo/yolo11x.pt

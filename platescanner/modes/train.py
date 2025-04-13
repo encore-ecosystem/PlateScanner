@@ -1,5 +1,5 @@
 from platescanner.utils import handle_path
-from platescanner.model import Yolo
+from platescanner.models import Yolo
 
 import albumentations
 

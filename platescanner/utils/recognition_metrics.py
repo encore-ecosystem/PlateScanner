@@ -1,6 +1,6 @@
 from Levenshtein import distance as levenshtein_distance
 from platescanner.utils import bbox_iou
-from cvtk.bbox import Bbox
+from cvtk.interfaces import Bbox
 
 threshold = 0.5
 

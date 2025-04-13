@@ -1,5 +1,5 @@
 from platescanner.utils.iou import bbox_iou
-from cvtk.bbox import Bbox
+from cvtk.interfaces import Bbox
 
 
 def nms(bboxes: list[Bbox], iou_threshold: float) -> list[Bbox]:

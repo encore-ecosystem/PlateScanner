@@ -8,23 +8,15 @@ import numpy as np
 import cv2
 import re
 
-from platescanner import FSR_MODEL_PATH
-
-# LOAD FSR
-sr = cv2.dnn_superres.DnnSuperResImpl_create()
-sr.readModel(FSR_MODEL_PATH.__str__())
-sr.setModel("fsrcnn", 3)
-
 
 def preprocess_license_plate(plate_image: Image):
     plate_image_np = pil_to_np(plate_image)
     if not(plate_image_np.ndim == 2 or plate_image_np.shape[-1] == 1):
         plate_image_np = A.ToGray(p=1.0, num_output_channels=1)(image=plate_image_np)['image']
-    super_resolved = sr.upsample(plate_image_np)
     augmented = A.Compose([
         A.CLAHE(clip_limit=2, tile_grid_size=(1, 1), p=1.0),
         A.Morphological(p=1.0, scale=(4, 4), operation="erosion"),
-    ])(image=super_resolved)['image']
+    ])(image=plate_image_np)['image']
 
     super_resolved_pil = np_to_pil(augmented)
     return super_resolved_pil

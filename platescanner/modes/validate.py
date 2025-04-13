@@ -6,7 +6,7 @@ from PIL import Image
 from platescanner.utils import get_target_bboxes, get_predicted_bboxes, handle_path, plot_conf_matrix, \
     preprocess_license_plate, RecognitionModel
 from platescanner import DEFAULT_CONFIDENCE_LEVEL, PLATESCANNER_ROOT_PATH
-from platescanner.model import Yolo, YoloOBB
+from platescanner.models import Yolo, YoloOBB
 from matplotlib import pyplot as plt
 from pathlib import Path
 from tqdm import tqdm

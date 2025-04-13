@@ -1,40 +1,18 @@
-[tool.poetry]
+[project]
 name = "platescanner"
-version = "0.4.0"
-description = ""
-authors = [
-    "Maksim Shushkevich <m.e.shushkevich@yandex.com>",
-    "Pavel Lekomtsev <example@of.com>",
-    "Vladislav Tyurin <example@of.com>"
-]
+version = "1.0.0"
+description = "Add your description here"
 readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "albumentations>=2.0.5",
+    "experimentator",
+    "cvtk",
+    "levenshtein>=0.27.1",
+    "ultralytics>=8.3.106",
+    "gitpython>=3.1.44", # for ultralytics
+]
 
-[tool.poetry.dependencies]
-python = ">=3.12,<3.13"
-ultralytics = ">=8.3.30"
-clearml = "^1.16.4"
-albumentations = "^1.4.10"
-nodeflow = "0.1.1"
-pycocotools = "^2.0.8"
-shapely = "^2.0.6"
-torch = {version = "==2.6.0+cu124", source = "pytorch-gpu"}
-torchvision = {version = "==0.21.0+cu124", source = "pytorch-gpu"}
-cvtk = { git = "https://github.com/encore-ecosystem/CVTK.git" }
-levenshtein = "^0.26.1"
-pytorch-lightning = "^2.5.0.post0"
-timm = "^1.0.14"
-nltk = "^3.9.1"
-numpy = "^1.26.4"
-opencv-contrib-python = "^4.11.0.86"
-
-[[tool.poetry.source]]
-name = "pytorch-gpu"
-url = "https://download.pytorch.org/whl/cu124"
-priority = "explicit"
-
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
-
-[tool.poetry.scripts]
-platescanner = "platescanner.main:main"
+[tool.uv.sources]
+experimentator = { git = "https://github.com/encore-ecosystem/Experimentator", branch = "basic_usage" }
+cvtk = { git = "https://github.com/encore-ecosystem/CVTK", branch = "basic_usage" }

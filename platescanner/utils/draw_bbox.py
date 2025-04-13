@@ -3,7 +3,7 @@ from pathlib import Path
 from PIL import Image
 from matplotlib.patches import Polygon
 from platescanner import BBOX_EDGE_COLOR, BBOX_TEXT_HORIZONTAL_SHIFT, BBOX_TEXT_VERTICAL_SHIFT, BBOX_TEXT_COLOR, BBOX_TEXT_FONTSIZE
-from cvtk.bbox import Bbox
+from cvtk.interfaces import Bbox
 import matplotlib.pyplot as plt
 
 
