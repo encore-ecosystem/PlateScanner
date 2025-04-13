@@ -4,4 +4,4 @@
 __pycache__
 datasets
 
-models/detector/yolo/yolo11x.pt
+model_weights/detector/yolo/poc_yolo11x.pt
