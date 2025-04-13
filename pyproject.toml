@@ -1,18 +1,25 @@
 [project]
 name = "platescanner"
-version = "1.0.0"
+version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
+authors = [
+    { name = "Maksim Shushkevich", email = "m.e.shushkevich@yandex.com" }
+]
 requires-python = ">=3.13"
 dependencies = [
     "albumentations>=2.0.5",
-    "experimentator",
-    "cvtk",
-    "levenshtein>=0.27.1",
-    "ultralytics>=8.3.106",
-    "gitpython>=3.1.44", # for ultralytics
+    "experimentator>=0.1.2",
+    "nltk>=3.9.1",
+    "pytorch-lightning>=2.5.1", # for parseq
+    "timm>=1.0.15", # // -- //
+    "ultralytics>=8.3.107", # for yolo
 ]
 
 [tool.uv.sources]
 experimentator = { git = "https://github.com/encore-ecosystem/Experimentator", branch = "basic_usage" }
-cvtk = { git = "https://github.com/encore-ecosystem/CVTK", branch = "basic_usage" }
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
