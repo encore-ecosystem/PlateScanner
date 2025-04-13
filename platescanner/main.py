@@ -1,7 +1,5 @@
 from platescanner.modes import *
 
-
-
 def main():
     import sys
     args = sys.argv
@@ -53,6 +51,7 @@ find_confidence:
 
 make_calibration_dataset:
     '-dataset_path'     : None                      # path to dataset directory
+
 """)
         case _:
             print("Please, choose any valid mode")

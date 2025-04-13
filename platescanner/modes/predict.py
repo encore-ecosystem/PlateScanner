@@ -98,7 +98,6 @@ def run(config: dict):
                 data.append((bbox, text))
             put_info_on_image(image, img_abs_path.stem, output_path, data)
 
-
 __all__ = [
     'mode'
 ]
