@@ -1,7 +1,13 @@
 .idea
 .venv
 .torchhub
+.ropeproject
+.experimentator
+
 __pycache__
 datasets
+
+dist
+*.egg-info
 
 model_weights/detector/yolo/poc_yolo11x.pt

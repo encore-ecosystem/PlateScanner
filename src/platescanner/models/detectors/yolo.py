@@ -8,6 +8,10 @@ from pathlib import Path
 from dataclasses import dataclass
 from PIL import Image
 
+import pickle
+import torch
+import json
+
 
 @dataclass
 class Yolo(Model):
@@ -65,10 +69,14 @@ class Yolo(Model):
 
     @classmethod
     def load(cls, weights_path: Path) -> "Yolo":
-        pass
+        path = weights_path / "model.pcl"
+        with path.open("rb") as f:
+            return pickle.load(f)
 
     def save(self, weights_path: Path):
-        pass
+        path = weights_path / "model.pcl"
+        with path.open("wb") as f:
+            pickle.dump(self, f)
 
     compute = predict
 

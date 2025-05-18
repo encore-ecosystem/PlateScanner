@@ -1,15 +1,16 @@
 from cvtk import AbstractDataset, MVP_Dataset
 from prologger import Logger
 
-from src.platescanner import EXPERIMENTATOR_PATH, MODELS_PATH
+from platescanner import EXPERIMENTATOR_PATH, MODELS_PATH
 from experimentator import Pipeline, Measurer, Model
 from typing import Optional, Sequence
 
-from src.platescanner.models.detectors import Yolo
-from src.platescanner.models.recognizers import Parseq
+from platescanner.models.detectors import Yolo
+from platescanner.models.recognizers import Parseq
 
 from PIL import Image
 from tqdm import tqdm
+from pathlib import Path
 
 
 class CPTPipeline(Pipeline):
@@ -35,7 +36,7 @@ class CPTPipeline(Pipeline):
             ),
         ]
         return models
-    
+
     def predict(self, dataset: MVP_Dataset):
         split = 'test'
         pbar  = tqdm(dataset.images[split])
@@ -46,6 +47,17 @@ class CPTPipeline(Pipeline):
 
             # step 1: Car detector
             print(image, attributes)
+
+    def save(self, dst_path: Path):
+        for i, model in enumerate(self._models):
+            model.save(dst_path / str(i))
+
+    @classmethod
+    def load(cls, src_path: Path) -> 'CPTPipeline':
+        pipeline = CPTPipeline()
+        for i, model in enumerate(pipeline._models):
+            pipeline._models[i] = model.load(src_path / str(i))
+        return pipeline
 
     def train_step(self, dataset: AbstractDataset, measurer: Measurer, logger: Logger, current_epoch: int):
         raise NotImplementedError

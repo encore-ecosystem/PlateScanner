@@ -9,6 +9,7 @@ from pathlib import Path
 from PIL.Image import Image
 
 import torch
+import pickle
 
 
 class Parseq(Model):
@@ -44,11 +45,15 @@ class Parseq(Model):
         return recognized_text
 
     @classmethod
-    def load(cls, weights_path: Path):
-        raise NotImplementedError
+    def load(cls, weights_path: Path) -> 'Parseq':
+        path = weights_path / "model.pcl"
+        with path.open("rb") as f:
+            return pickle.load(f)
 
     def save(self, weights_path: Path):
-        raise NotImplementedError
+        path = weights_path / "model.pcl"
+        with path.open("wb") as f:
+            pickle.dump(self, f)
 
     def train_step(
         self,

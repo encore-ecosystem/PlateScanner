@@ -1,10 +1,10 @@
 from Levenshtein import distance as levenshtein_distance
-from src.platescanner.utils import bbox_iou
+from cvtk.utils import bbox_iou
 from cvtk.interfaces import Bbox
 
 threshold = 0.5
 
-def evaluate_metrics(ground_truth_text: dict[str, tuple[Bbox, str]], recognized_text: dict[str, tuple[Bbox, str]]) -> tuple[dict, dict]:
+def evaluate_metrics(ground_truth_text: dict[str, list[tuple[Bbox, str]]], recognized_text: dict[str, list[tuple[Bbox, str]]]) -> tuple[dict, dict]:
     lev_scores = {}
     business_scores = {}
     for image_stem in ground_truth_text.keys():

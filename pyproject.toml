@@ -10,6 +10,7 @@ requires-python = ">=3.13"
 dependencies = [
     "albumentations>=2.0.5",
     "experimentator>=0.1.2",
+    "levenshtein>=0.27.1",
     "nltk>=3.9.1",
     "pytorch-lightning>=2.5.1", # for parseq
     "timm>=1.0.15", # // -- //
@@ -18,8 +19,3 @@ dependencies = [
 
 [tool.uv.sources]
 experimentator = { git = "https://github.com/encore-ecosystem/Experimentator", branch = "basic_usage" }
-
-[build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
-
