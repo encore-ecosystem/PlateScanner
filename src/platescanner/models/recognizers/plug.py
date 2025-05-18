@@ -7,21 +7,18 @@ from prologger import Logger
 
 
 class Plug(Model):
-    def __init__(self, weight_path: Path):
-        pass
-
     @classmethod
     def load(cls, weights_path: Path):
-        raise NotImplementedError
+        return Plug()
 
     def save(self, weights_path: Path):
-        raise NotImplementedError
+        pass
 
     def compute(self, variable: object):
-        raise NotImplementedError
+        return self.predict(variable)
 
     def is_loses_information(self) -> bool:
-        raise NotImplementedError
+        return True
 
     def predict(self, input_tensor) -> str:
         import random
@@ -35,13 +32,13 @@ class Plug(Model):
         return plate_text
 
     def train_step(self, dataset: AbstractDataset, measurer: Measurer, logger: Logger, current_epoch: int):
-        raise NotImplementedError
+        pass
 
     def test_step(self, dataset: AbstractDataset, measurer: Measurer, logger: Logger, current_epoch: int):
-        raise NotImplementedError
+        pass
 
     def eval_step(self, dataset: AbstractDataset, measurer: Measurer, logger: Logger, current_epoch: int):
-        raise NotImplementedError
+        pass
 
 __all__ = [
     'Plug'
