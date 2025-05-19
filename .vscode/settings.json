@@ -1,0 +1,13 @@
+{
+    "files.exclude": {
+        ".venv": true,
+        ".torchhub": true,
+        ".experimentator": true,
+        "src/__pycache__": true,
+        "src/platescanner/__pycache__": true,
+        "src/platescanner/models/__pycache__": true,
+        "src/platescanner/models/recognizers/__pycache__": true,
+        "src/platescanner/models/detectors/__pycache__": true,
+        "src/platescanner/pipelines/__pycache__": true
+    }
+}

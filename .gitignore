@@ -11,3 +11,7 @@ dist
 *.egg-info
 
 model_weights/detector/yolo/poc_yolo11x.pt
+
+runs
+yolo11n.pt
+yolov5nu.pt

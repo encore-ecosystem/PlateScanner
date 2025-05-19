@@ -16,7 +16,7 @@ BBOX_TEXT_VERTICAL_SHIFT   = -20
 # ================
 # Constants
 # ================
-PLATESCANNER_ROOT_PATH = Path()
+PLATESCANNER_ROOT_PATH = Path().resolve()
 EXPERIMENTATOR_PATH    = PLATESCANNER_ROOT_PATH / ".experimentator"
 DATASETS_PATH          = PLATESCANNER_ROOT_PATH / "datasets"
 MODELS_PATH            = PLATESCANNER_ROOT_PATH / "model_weights"
