@@ -28,7 +28,7 @@ class CPipeline(Pipeline):
     def __default():
         models = [
             Yolo(  # Car Detector
-                weights=MODELS_PATH / "detector" / "cat" / "yolo5nu.pt",
+                weights=MODELS_PATH / "detector" / "car" / "yolo5nu.pt",
             ),
         ]
         return models
@@ -46,14 +46,9 @@ class CPipeline(Pipeline):
     def predict_on_image(self, image_path: Path) -> list[Bbox]:
         image = Image.open(image_path)
 
-        # step 1: Plate detection
+        # step 1: car detection
         bboxes: list[Bbox] = self._models[0].predict(image)
 
-        # step 2: Plate recognition
-        for bbox in bboxes:
-            plate_image = bbox.crop_on(image)
-            recognized_text = self._models[1].predict(plate_image)
-            bbox.value = recognized_text
         return bboxes
 
     def save(self, dst_path: Path):
