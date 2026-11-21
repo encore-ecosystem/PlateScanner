@@ -1,226 +1,147 @@
-<h1 style="text-align: center; margin-bottom: 40px;">PlateScanner</h1>
+<div align="center">
 
-<p style="text-align: center;">
-    <img alt="Logo" height="600" src="appendices/articles/Assets/third_out_cropped.png" width="1200"/>
+<h1>
+  <br>
+  🅿🅻🅰🆃🅴🆂🅲🅰🅽🅽🅴🆁
+  <br>
+</h1>
+
+<h3>License-plate detection and recognition</h3>
+
+<p><i>Five detector architectures, three OCR models and a validation method that looks past a single mAP number.</i></p>
+
+<p>
+  <img alt="Python" src="https://img.shields.io/badge/Python-3.12-3776AB?style=for-the-badge&logo=python&logoColor=white">
+  <img alt="PyTorch" src="https://img.shields.io/badge/PyTorch-2.6-EE4C2C?style=for-the-badge&logo=pytorch&logoColor=white">
+  <img alt="Ultralytics YOLO11" src="https://img.shields.io/badge/Ultralytics-YOLO11-111F68?style=for-the-badge&logo=ultralytics&logoColor=white">
+  <img alt="OpenCV" src="https://img.shields.io/badge/OpenCV-4.11-5C3EE8?style=for-the-badge&logo=opencv&logoColor=white">
+  <img alt="ClearML" src="https://img.shields.io/badge/ClearML-MLOps-09A3D5?style=for-the-badge">
+  <img alt="Poetry" src="https://img.shields.io/badge/Poetry-managed-60A5FA?style=for-the-badge&logo=poetry&logoColor=white">
 </p>
 
+<p>
+  <a href="#tldr">TL;DR</a> •
+  <a href="#quickstart">Quickstart</a> •
+  <a href="#modes">Modes</a> •
+  <a href="#results">Results</a> •
+  <a href="#validation">Validation method</a> •
+  <a href="#tech-stack">Tech stack</a> •
+  <a href="#license">License</a>
+</p>
 
-Добро пожаловать в **PlateScanner**! Этот проект разработан для эффективного и точного распознавания номерных знаков. Наша цель – предоставить надежное решение, которое использует современные алгоритмы для распознавания и извлечения информации о номерных знаках из изображений и видео.
+<a href="https://huggingface.co/spaces/PavelLekomtsev/PlateScanner">Demo on Hugging Face</a>
 
-# Содержание
+</div>
 
- - [Демоверсия](#-демоверсия)
- - [Начало работы](#начало-работы-)
- - - [Шаги установки](#шаги-установки)
+---
 
- - [Запуск приложения](#запуск-приложения)
- - - [Train](#train)
- - - [Predict](#predict)
- - - [Validate](#validate)
+<div align="center">
+  <img src="appendices/articles/Assets/third_out_cropped.png" alt="Detected and recognised license plates on a busy road" width="820">
+  <br><sub><i>Plates detected on a dense traffic scene; every box is passed to the recognition model.</i></sub>
+</div>
 
- - [Метрики нейронных сетей](#метрики-нейронных-сетей)
+---
 
- - [Лицензия](#лицензия)
+<a id="tldr"></a>
+## 🚀 TL;DR
 
-# 🔗 Демоверсия
+PlateScanner finds Russian vehicle license plates on images and reads them. It is a command-line tool built by the [Encore Ecosystem](https://github.com/encore-ecosystem) team:
 
-👉 [Демо PlateScanner](https://huggingface.co/spaces/PavelLekomtsev/PlateScanner)
+- **Detection** – Ultralytics YOLO models, including oriented bounding boxes (OBB) for tilted plates. Five architectures were trained and compared; YOLO11x gives the best balance (precision 0.95, recall 0.73 at confidence 0.06).
+- **Recognition (OCR)** – three text-recognition models were tested; ParseQ wins with a mean average Levenshtein similarity of 0.935.
+- **Validation** – on top of mAP50 / mAP50-95, ground-truth boxes are split by distance to the camera, time of day and brightness, so a model that only sees far-away plates no longer looks as good as one that generalises.
 
-🛠 Возможности демоверсии:
+---
 
-- ✅ Загрузка изображения с номерным знаком
-- ✅ Автоматическое распознавание символов
-- ✅ Визуальное отображение результата
-- ✅ Проверка точности работы алгоритма
+<a id="quickstart"></a>
+## ⚡ Quickstart
 
-🚀 Оцените мощь наших технологий в реальном времени!
-# Начало работы 
-Для начала работы с **PlateScanner** убедитесь, что у вас установлена версия ***Python 3.12*** или выше. Этот проект требует нескольких зависимостей, которые можно легко управлять с помощью **Poetry**. Ниже приведены шаги для настройки проекта:
+Needs Python 3.12. Dependencies are managed with Poetry; PyTorch comes from the CUDA 12.4 wheel index.
 
-### Предварительные требования
-- **Python 3.12**
-
-## Шаги установки
-1. **Клонируйте репозиторий** на свой локальный компьютер:
 ```bash
 git clone https://github.com/encore-ecosystem/PlateScanner.git
-```
-
-2. **Перейдите в каталог** проекта:
-```bash
 cd PlateScanner
-```
-
-3. **Установите консольное приложение** с помощью pip или pip3:
-```bash
-pip3 install .
-```
-4. **Установите переменную окружения**, например:
-```bash
-set PLATESCANNER_ROOT_PATH = "$PWD"
-=======
-```bash
-pip3 install .
-```
-# Запуск приложения
-Чтобы посмотреть режимы работы приложения **PlateScanner**, используйте следующую команду:
-```bash
-
+poetry install                     # or: pip install . --extra-index-url https://download.pytorch.org/whl/cu124
+export PLATESCANNER_ROOT_PATH="$PWD"   # Windows: set PLATESCANNER_ROOT_PATH=%cd%
 platescanner help
 ```
 
-**PlateScanner** предоставляет возможность предсказывать ограничивающие рамки (bounding boxes) на изображении, распознавать текст на номерных знаках, а также валидировать нейронные сети. Для этого необходимо выполнить небольшую предварительную настройку. Проект предлагает предобученные модели, которые можно загрузить по следующей ссылке: **[Models](https://disk.yandex.ru/d/s3NrpFxzpE02YQ)**. Скачайте интересующие вас модели в папку _PlateScanner/models_.
+Run detection and recognition on a folder of images (the output folder must exist and be empty; the confidence level is given in percent):
 
-## Train
-**🎯 Запуск тренировки модели**
 ```bash
-python main.py train --weights_path <path_to_weights> --dataset_path <path_to_dataset> --use_clearml <True/False>
+platescanner predict -weights_path models/yolo11n-obb.pt -dataset_path path/to/images -output_path path/to/output -confidence_level 6
 ```
-Параметры тренировки
 
-- _weights_path_ (по умолчанию: None) – путь к файлу весов модели.
+<a id="modes"></a>
+### Modes
 
-- _dataset_path_ (по умолчанию: None) – путь к директории с датасетом.
+| Mode | What it does | Main flags |
+|---|---|---|
+| `train` | trains a detector, optionally logging to ClearML | `-weights_path`, `-dataset_path`, `-use_clearml` |
+| `predict` | detection, or detection + recognition | `-weights_path`, `-dataset_path`, `-output_path`, `-confidence_level`, `-detection_only` |
+| `validate` | detection and/or recognition metrics on a labelled set | `-weights_path`, `-dataset_path`, `-output_path`, `-confidence_level`, `-detection_only` |
+| `find_confidence` | searches for the confidence threshold that reaches a target precision | `-weights_path`, `-dataset_path`, `-iters`, `-target_precision` |
+| `make_calibration_dataset` | builds a calibration set from a dataset | `-dataset_path` |
 
-- _use_clearml_ (по умолчанию: False) – использовать ли ClearML для обучения.
+---
 
-Для обучения/дообучения моделей проект предоставляет скрипт _scripts/train.py_. Чтобы задать параметры, нужно:
+<a id="results"></a>
+## 📊 Results
 
- - **< weights_path >** : Путь до весов модели. В случае, если вы хотите обучить новую модель, загрузите её начальные веса в папку проекта.
+**Detection** – target set of 24 varied images, confidence fixed at 0.06:
 
+| Model | TP | FN | FP | Precision | Recall | F1 | Time, s / frame |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| yolo11n-obb | 18 | 57 | 4 | 0.818 | 0.240 | 0.371 | 0.448 |
+| yolov5nu | 40 | 35 | 20 | 0.667 | 0.533 | 0.593 | 0.187 |
+| yolo11n | 46 | 29 | 5 | 0.902 | 0.613 | 0.730 | 0.453 |
+| yolo11n-obb v2 | 56 | 19 | 21 | 0.727 | 0.747 | 0.737 | 0.206 |
+| **yolo11x** | 55 | 20 | 3 | **0.948** | 0.733 | **0.827** | 0.658 |
 
- - **< dataset_path >** : Путь до тренировочного датасета.
+**Detection at precision > 0.90** – confidence tuned per model with `find_confidence`:
 
+| Model | Confidence | TP | FN | FP | Precision | Recall | F1 |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| yolo11n-obb | 0.43 | 10 | 65 | 1 | 0.909 | 0.133 | 0.233 |
+| yolov5nu | 0.27 | 28 | 47 | 1 | 0.966 | 0.373 | 0.539 |
+| yolo11n-obb v2 | 0.54 | 35 | 40 | 2 | 0.946 | 0.467 | 0.625 |
+| yolo11n | 0.14 | 43 | 32 | 3 | 0.935 | 0.573 | 0.711 |
+| **yolo11x** | 0.07 | 55 | 20 | 2 | **0.965** | 0.733 | **0.833** |
 
- - **< augmentation >** : Аугментации, которые будут применяться в процессе тренировки, из библиотеки **Albumentations**.
+**Recognition (ParseQ):**
 
+| Metric | Value | Meaning |
+|---|---:|---|
+| Mean average Levenshtein similarity | 0.935 | missing, extra and wrong characters are penalised equally; averaged per image, then over the set |
+| Business metric | 0.800 | share of plates read exactly right |
 
+---
 
-Для того, чтобы изменить такие параметры, как _batch_size_, _save_period_ и _resume_ тренировки, перейдите в скрипт _src/nodeflow_enf/functions/train_yolo.py_ :
+<a id="validation"></a>
+## 🔍 Validation method
 
+A single mAP hides the cases that matter in production: one of our networks was excellent on distant plates and missed close ones, another found many plates but read them worse. PlateScanner therefore classifies every ground-truth box by **distance** (box size), **time of day** and **brightness**, and reports detection quality per group on top of the standard mAP50 and mAP50-95.
 
-- **< batch >** :
-    - При -1 batch подбирается автоматически.
-    - Float из диапазона (0, 1) интерпретируется как процент заимствования видеопамяти.
-    - Int [1, ...] - число batch'ей
+The full write-up (in Russian) is in [appendices/articles/Art1.md](appendices/articles/Art1.md).
 
+---
 
-- **< save_period >** : В папке _scripts/runs_ проекта, создаваемой скриптом тренировки, будут сохраняться веса модели с указанной периодичностью.
+<a id="tech-stack"></a>
+## 🧰 Tech stack
 
+| Area | Tools |
+|---|---|
+| Detection | Ultralytics YOLO11 / YOLOv5, OBB heads, custom NMS and area filters |
+| Recognition | ParseQ (PyTorch Lightning, timm) |
+| Data | Albumentations, pycocotools, Shapely, CVTK (YOLO ↔ COCO conversion) |
+| Experiments | ClearML, NodeFlow pipelines |
+| Packaging | Poetry, `platescanner` console script |
 
-- **< resume >** : При тренировке с последней сохранённой эпохи передайте параметр **resume=True** в _config_ файла. Укажите _last_ веса модели из _scripts/runs_ в _weights_path_ предыдущего пункта.
+Authors: Maksim Shushkevich, Pavel Lekomtsev, Vladislav Tyurin – Encore Ecosystem.
 
+---
 
+<a id="license"></a>
+## 📜 License
 
-Для того, чтобы изменить такие параметры, как _imgsz_ и _epochs_ тренировки, перейдите в скрипт _src/model/yolo_ultralytics/abstract.py_ , в функцию **fit** :
-
-
-- **< imgsz >** : Размер изображения, который подаётся на вход модели.
-
-
-- **< epochs >** : Количество эпох тренировки.
-
-
-
-## Predict
-
-После загрузки моделей для режима предсказания (**predict**) по порядку указывайте следующие параметры:
-
-**🎯 Запуск predict - режима модели**
-```bash
-python main.py predict --weights_path <path_to_weights> --dataset_path <path_to_dataset> --output_path <path_to_output> --confidence_level <value> --detection_only <True/False>
-```
- - **< weights_path >** : Укажите абсолютный путь к файлу весов модели для детекции.
-
-
- - **< dataset_path >** : Укажите абсолютный путь к папке, содержащей входные изображения или видео. **Важно отметить**, что указанная папка должна соответствовать следующей структуре: _input_path/test/images_. То есть, если вы указываете путь _PlateScanner/dataset_, изображения будут загружаться из папки _PlateScanner/dataset/test/images_.
-
-
- - **< output_path >** : Укажите абсолютный путь к папке, где будут сохранены результаты.
-
-
- - **< confidence_level >** : (Необязательный) Укажите уровень доверия для детекции в процентах.
-
-
- - **< detection_only >** : (по умолчанию: False) Укажите True только для детекции номеров, False для детекции + распознавания текста.
-
- 
- Нажмите Enter, и начнётся процесс предсказания. После его завершения вы сможете просмотреть результаты в указанной вами выходной папке.
-
-## Validate
-
-Проект **PlateScanner** предоставляет пользователям специализированную валидацию. Подробнее о ней вы можете ознакомиться, перейдя по следующей ссылке: **[Новые подходы к валидации нейронных сетей в задаче детекции ГРЗ](/appendices/articles/Art1.md)**.
-
-Чтобы запустить процесс валидации, по порядку указывайте следующие параметры:
-
-**🎯 Запуск validate - режима модели**
-```bash
-python main.py validate --weights_path <path_to_weights> --dataset_path <path_to_dataset> --output_path <path_to_output> --confidence_level <value> --detection_only <True/False>
-```
-- **< weights_path >** : Укажите абсолютный путь к файлу весов модели для детекции.
-
-
-- **< dataset_path >** : Укажите абсолютный путь к папке, содержащей входные изображения с разметкой. Важно отметить, что указанная папка должна соответствовать следующей структуре: _input_path/valid/images_ и _input_path/valid/labels_. То есть, если вы указываете путь _PlateScanner/dataset_, изображения будут валидироваться из папки _PlateScanner/dataset/valid/images_ по разметке из _PlateScanner/dataset/valid/labels_. Важное замечание: если вы хотите провалидировать модель формата OBB, то разметка labels также должна быть формата OBB. Более подробно про OBB-разметку можно ознакомиться [здесь](https://docs.ultralytics.com/ru/tasks/obb/).
-
-
- - **< output_path >** : Укажите абсолютный путь к папке, где будут сохранены результаты.
-
-
- - **< confidence_level >** : (Необязательный) Укажите уровень доверия для детекции в процентах. 
-
-
- - **< detection_only >** : (по умолчанию: False) Укажите True только для детекции номеров, False для детекции + распознавания текста.
-
-
- - **< criteria >** : Выберите номер критерия, который вас интересует. Результаты __confusion matrix__ будут строиться по указанным вами критериям. Если критерий не имеет значения, нажмите Enter _(any)_.
-
-
- - **< num of images >** : Выберите количество изображений, на которые вы хотели бы взглянуть, чтобы оценить, как нейронная сеть справилась с разметкой по указанным критериям. Будут использованы первые _n_ указанных изображений. Если вы хотите просмотреть все изображения, просто нажмите Enter. 
-
-Результаты работы валидации и __confusion matrix__ можно будет найти в указанной вами выходной папке.
-
-
-
-# Метрики нейронных сетей
-
-Мы предоставляем пользователю результаты валидации нейронных сетей для детекции на таргетовом датасете, состоящем из 24 разносортных изображений при фиксированном _confidence_ = 6%.
-
-| **Версия модели**     | **Confidence** | **TP** | **FN** | **FP** | **Precision** | **Recall** | **F1-Score** | **Обработка изображения; <br/>sec / frame**  |
-|-----------------------|----------------|--------|--------|--------|---------------|------------|---------------|:---------------------------------------:|
-| yolo11n-obb          | 0,06           |   18   |   57   |   4    |    0,81818    |   0,24000  |    0,37113    |                 0,4484                  |
-| yolov5nu             | 0,06           |   40   |   35   |   20   |    0,66667    |   0,53333  |    0,59259    |                 0,1873                  |
-| yolo11n              | 0,06           |   46   |   29   |   5    |    0,90196    |   0,61333  |    0,73016    |                 0,4525                  |
-| yolo11n-obbv2        | 0,06           |   56   |   19   |   21   |    0,72727    |   0,74667  |    0,73684    |                 0,2058                  |
-| yolo11x              | 0,06           |   55   |   20   |   3    |    0,94828    |   0,73333  |    0,82707    |                 0,6579                  |
-
-
-А также при __Precision__ > 90%:
-
-| Версия модели      | Confidence | TP | FN | FP | Precision | Recall  | F1-Score |
-|--------------------|------------|----|----|----|-----------|---------|----------|
-| yolo11n-obb        | 0,43       | 10 | 65 | 1  | 0,90909   | 0,13333 | 0,23256  |
-| yolov5nu           | 0,27       | 28 | 47 | 1  | 0,96554   | 0,37333 | 0,53854  |
-| yolo11n-obbv2      | 0,54       | 35 | 40 | 2  | 0,94595   | 0,46667 | 0,62500  |
-| yolo11n            | 0,14       | 43 | 32 | 3  | 0,93484   | 0,57333 | 0,71072  |
-| yolo11x            | 0,07       | 55 | 20 | 2  | 0,96491   | 0,73333 | 0,83333  |
-
-### Распознавание текста (OCR)
-
-Для оценки качества работы нейронной сети для задачи *OCR* (лучшие результаты представила нейронная сеть **parseq**) были выбраны следующие метрики:
-
-- **Mean Average Levenstein** – одинаково наказывает ошибки в виде пропущенной, излишней или неверной буквы. Данная метрика является более показательной с точки зрения работоспособности модели. Сначала вычисляется среднее значение для каждого изображения, затем берется среднее по всему датасету.
-
-- **Business Metric** – бинарная метрика, оценивающая точное попадание в номер. Если распознанный номер полностью совпадает с правильным – присваивается 1, иначе 0. Затем сумма всех попаданий делится на максимально возможное количество распознаваний в датасете.
-
-**Результаты OCR-модели:**
-
-| **Метрика**             | **Значение** | 
-|-------------------------|--------------|
-| Mean Average Levenstein | 0.935        |
-| Business Metric         | 0.800        |
-
-
-
-# Лицензия
-
-Доступ к программному обеспечению предоставляется в соответствии с [EULA](LICENSE).
+Distributed under the PlateScanner End-User License Agreement – see [LICENSE](LICENSE).
